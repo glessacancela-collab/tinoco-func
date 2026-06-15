@@ -53,6 +53,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .field label{display:block;font-size:12px;font-weight:500;color:#7a7d85;margin-bottom:4px}
 .field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-xs);background:rgba(255,255,255,.06);color:#e8eaed;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:#7dc51e}
+.field input:disabled{opacity:0.5;cursor:not-allowed}
 .field textarea{resize:vertical;min-height:70px}
 .btn-primary{width:100%;padding:12px;border-radius:var(--radius-sm);background:#7dc51e;color:#1a1b1f;font-size:15px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:opacity .15s}
 .btn-primary:active{opacity:.85}
@@ -71,8 +72,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .icon-btn-wrap{position:relative;display:inline-flex}
 
 .content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--safe-bot) + 68px)}
-.tab-bar{position:fixed;bottom:0;left:0;right:0;background:#27292f;border-top:1px solid rgba(125,197,30,.15);display:flex;padding-bottom:var(--safe-bot);z-index:50}
-.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 6px;background:none;border:none;cursor:pointer;color:#5a5d66;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;transition:color .15s;position:relative}
+.tab-bar{position:fixed;bottom:0;left:0;right:0;background:#27292f;border-top:1px solid rgba(125,197,30,.15);display:flex;padding-bottom:var(--safe-bot);z-index:50;overflow-x:auto;scrollbar-width:none}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab-btn{flex:1;min-width:60px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 6px;background:none;border:none;cursor:pointer;color:#5a5d66;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;transition:color .15s;position:relative}
 .tab-btn.active{color:#7dc51e}
 .tab-btn svg{width:22px;height:22px;stroke-width:1.8}
 .tab-dot{position:absolute;top:6px;right:calc(50% - 14px);width:7px;height:7px;border-radius:50%;background:var(--danger);border:1.5px solid #27292f;display:none}
@@ -97,8 +99,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .store-head{display:flex;align-items:center;gap:8px;padding:10px 13px;border-bottom:1px solid var(--border2)}
 .store-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .store-name{font-size:14px;font-weight:600;flex:1}
-.store-cnt{font-size:11px;background:var(--card2);border:1px solid var(--border);border-radius:999px;padding:2px 8px;color:var(--text2)}
-.drop-zone{min-height:50px;padding:8px;display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start;transition:background .15s}
+.shift-section{border-top:1px solid var(--border2)}
+.shift-title{font-size:10px;font-weight:700;color:var(--text3);padding:6px 13px 0;text-transform:uppercase}
+.drop-zone{min-height:45px;padding:8px 13px;display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start;transition:background .15s}
 .drop-zone.drag-over{background:var(--accent-bg)}
 .bench-box{background:var(--card);border-radius:var(--radius);padding:10px;min-height:52px;display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start;box-shadow:var(--shadow)}
 .bench-box.drag-over{background:var(--accent-bg)}
@@ -326,16 +329,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
           <span id="statusTxt">Distribua a equipe.</span>
         </div>
       </div>
-      <div class="section-title">Disponíveis</div>
+      <div class="section-title">Disponíveis neste dia</div>
       <div class="bench-box" id="bench" style="margin-bottom:12px"></div>
-      <div class="section-title">Lojas</div>
+      <div class="section-title">Lojas e Turnos</div>
       <div id="storesArea"></div>
       <div id="inactiveSection" style="display:none">
-        <div class="section-title" style="margin-top:4px">Indisponíveis</div>
+        <div class="section-title" style="margin-top:4px">Indisponíveis (Folga/Férias)</div>
         <div class="inactive-box" id="inactiveBox" style="margin-bottom:12px"></div>
       </div>
       <div id="adminEscalaControls" style="display:none;margin-bottom:16px">
-        <button class="btn btn-ghost btn-sm" onclick="resetSchedule()">↺ Reiniciar escala</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetSchedule()">↺ Reiniciar este dia</button>
       </div>
     </div>
 
@@ -359,10 +362,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 
       <div id="adminPontoSection" style="display:none">
         <div style="display:flex;align-items:center;gap:8px;margin:12px 0 8px;flex-wrap:wrap">
-          <div class="section-title" style="margin:0;flex:1">Ponto em tempo real hoje</div>
-          <button class="btn btn-ghost btn-sm" onclick="buildAllPonto()" style="gap:4px">↺ Atualizar</button>
+          <div class="section-title" style="margin:0;flex:1">Auditoria de Ponto</div>
         </div>
-        <div class="card" id="allPontoCard"></div>
+        <div class="card">
+          <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+            <div class="form-row">
+              <div class="field" style="margin:0">
+                <label>Funcionário</label>
+                <select id="buscaPontoFunc" class="field input"></select>
+              </div>
+              <div class="field" style="margin:0">
+                <label>Data Específica</label>
+                <input type="date" id="buscaPontoData" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--bg);color:var(--text);font-size:14px;font-family:inherit;outline:none">
+              </div>
+            </div>
+            <button class="btn btn-accent btn-full" onclick="buscarPontoDia()" style="margin-top:2px">Ver jornada deste dia</button>
+            <div id="resultadoPontoDia" style="margin-top:8px;font-size:13px"></div>
+          </div>
+        </div>
 
         <div style="display:flex;align-items:center;gap:8px;margin:14px 0 8px;flex-wrap:wrap">
           <div class="section-title" style="margin:0;flex:1">Banco de horas equipe</div>
@@ -384,10 +401,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
                 <input type="month" id="relMes" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--bg);color:var(--text);font-size:14px;font-family:inherit;outline:none">
               </div>
             </div>
-            <button class="btn btn-accent btn-full" onclick="gerarRelatorioPonto()" style="margin-top:2px">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-              Gerar PDF do relatório
-            </button>
+            <button class="btn btn-ghost btn-full" onclick="gerarRelatorioPonto()" style="margin-top:2px">Gerar PDF do relatório</button>
           </div>
         </div>
       </div>
@@ -402,6 +416,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
       <div id="adminSolicitacoes" style="display:none">
         <div class="section-title" style="margin-top:4px">Pendentes de análise</div>
         <div class="card" id="pendentesCard"></div>
+        <div style="display:flex;align-items:center;gap:8px;margin:24px 0 10px">
+          <div class="section-title" style="margin:0;flex:1">Histórico de Decisões</div>
+          <input type="month" id="filtroMesSol" onchange="buildSolicitacoes()" style="padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--bg);color:var(--text);font-size:11px;font-family:inherit;outline:none">
+        </div>
+        <div id="historicoSolCard"></div>
       </div>
     </div>
 
@@ -421,6 +440,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
       </div>
       <div class="section-title" id="calDayLabel">Tarefas de hoje</div>
       <div class="card" id="tarefasList"></div>
+      
+      <div style="display:flex;align-items:center;gap:8px;margin:24px 0 10px">
+        <div class="section-title" style="margin:0;flex:1">Histórico de Concluídas</div>
+        <input type="month" id="filtroMesTf" onchange="buildTarefasHistorico()" style="padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--bg);color:var(--text);font-size:11px;font-family:inherit;outline:none">
+      </div>
+      <div class="card" id="tarefasHistList"></div>
     </div>
 
     <div class="screen" id="screen-mural">
@@ -446,10 +471,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
     <div class="screen" id="screen-equipe">
       <div style="display:flex;align-items:center;gap:8px;margin:12px 0 10px">
         <div class="section-title" style="margin:0;flex:1">Equipe</div>
-        <button class="btn btn-accent btn-sm" onclick="openSheet('sheetFuncionario')">+ Funcionário</button>
+        <button class="btn btn-accent btn-sm" id="adminEquipeBtn" onclick="abrirNovoFuncionario()" style="display:none">+ Novo</button>
       </div>
       <div class="card" id="equipeList"></div>
     </div>
+    
+    <div class="screen" id="screen-niver">
+      <div style="display:flex;align-items:center;gap:8px;margin:12px 0 10px">
+        <div class="section-title" style="margin:0;flex:1">Aniversariantes</div>
+      </div>
+      <div class="card" id="niverList"></div>
+    </div>
+
   </div>
 
   <div class="tab-bar" id="tabBar"></div>
@@ -473,8 +506,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
       <label>Especifique o motivo</label>
       <input type="text" id="solOutroTexto" placeholder="Escreva o tipo de solicitação">
     </div>
-    <div class="field"><label>Data</label><input type="date" id="solData"></div>
-    <div class="field"><label>Detalhes</label><textarea id="solDetalhes" placeholder="Explique a solicitação"></textarea></div>
+    <div class="field"><label>Data de referência</label><input type="date" id="solData"></div>
+    <div class="field"><label>Detalhes adicionais</label><textarea id="solDetalhes" placeholder="Explique a situação"></textarea></div>
     <button class="btn btn-accent btn-full" onclick="enviarSolicitacao()" style="margin-top:4px">Enviar solicitação</button>
     <button class="btn btn-ghost btn-full" onclick="closeSheet('sheetSolicitacao')" style="margin-top:8px">Cancelar</button>
   </div>
@@ -541,10 +574,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 <div class="sheet-overlay" id="sheetFuncionario">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">Cadastrar funcionário</div>
+    <div class="sheet-title" id="fnSheetTitle">Cadastrar funcionário</div>
+    <input type="hidden" id="fnOldName" value="">
     <div class="field"><label>Nome completo</label><input type="text" id="fnNome" placeholder="Nome do funcionário"></div>
     <div class="field"><label>E-mail de acesso</label><input type="email" id="fnEmail" placeholder="funcionario@email.com"></div>
-    <div class="field"><label>Senha inicial</label><input type="password" id="fnSenha" placeholder="Mínimo 6 caracteres"></div>
+    <div class="form-row">
+      <div class="field"><label>Senha de acesso</label><input type="text" id="fnSenha" placeholder="Mín. 6 dígitos"></div>
+      <div class="field"><label>Nascimento (Opcional)</label><input type="date" id="fnNasc"></div>
+    </div>
     <div class="field"><label>Loja principal</label>
       <select id="fnLoja">
         <option value="icarai">Icaraí</option>
@@ -553,10 +590,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
       </select>
     </div>
     <div class="field">
-      <label>Dias de folga semanal</label>
+      <label>Dias de folga semanal rotineira</label>
       <div class="days-grid" id="fnFolgaGrid"></div>
     </div>
-    <button class="btn btn-accent btn-full" onclick="cadastrarFuncionario()" style="margin-top:4px">Cadastrar</button>
+    <button class="btn btn-accent btn-full" onclick="salvarFuncionario()" style="margin-top:4px">Salvar</button>
     <button class="btn btn-ghost btn-full" onclick="closeSheet('sheetFuncionario')" style="margin-top:8px">Cancelar</button>
   </div>
 </div>
@@ -603,6 +640,7 @@ const DAYS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const PALETTE_COUNT=9;
 const STORES=[{id:'icarai',label:'Icaraí',color:'#185FA5'},{id:'itaipu',label:'Itaipu',color:'#0F6E56'},{id:'maravista',label:'Maravista',color:'#854F0B'}];
+const SHIFTS=[{id:'m',label:'09h às 18h'},{id:'t',label:'10h às 19h'}];
 const ADMIN_PASS='tinoco2025';
 const PRIO_COLORS={urgente:'#dc2626',normal:'#d97706',baixa:'#16a34a'};
 const PRIO_LABELS={urgente:'Urgente',normal:'Normal',baixa:'Baixa'};
@@ -636,12 +674,22 @@ function sanitizeState(data) {
     let res = data || {};
     res.users = res.users || {};
     res.schedule = res.schedule || {};
-    res.schedule.storeAssign = res.schedule.storeAssign || {};
-    STORES.forEach(s => { 
-        res.schedule.storeAssign[s.id] = ensureArray(res.schedule.storeAssign[s.id]); 
-    });
-    res.schedule.bench = ensureArray(res.schedule.bench);
     if(res.schedule.currentDay === undefined) res.schedule.currentDay = new Date().getDay();
+    
+    if(!res.schedule.week) {
+        res.schedule.week = {};
+    }
+    for(let i=0; i<7; i++){
+        if(!res.schedule.week[i]) res.schedule.week[i] = { bench: [] };
+        res.schedule.week[i].bench = ensureArray(res.schedule.week[i].bench);
+        STORES.forEach(s => {
+            SHIFTS.forEach(sh => {
+                const sid = s.id+'_'+sh.id;
+                res.schedule.week[i][sid] = ensureArray(res.schedule.week[i][sid]);
+            });
+        });
+    }
+
     res.rules = ensureArray(res.rules);
     if(res.rules.length === 0) {
         res.rules = [{type:'nao_sozinho',person:'Pedro'},{type:'min_loja',store:'icarai',min:2}];
@@ -682,14 +730,15 @@ onValue(ref(database, 'tinoco_state'), (snapshot) => {
     if (data) {
         S = sanitizeState(data);
         if (currentUser) {
-            initBench();
+            initBenchAllDays();
             if(document.getElementById('screen-escala').classList.contains('active')) buildSchedule();
             if(document.getElementById('screen-ponto').classList.contains('active')) buildPonto();
             if(document.getElementById('screen-solicitacoes').classList.contains('active')) buildSolicitacoes();
-            if(document.getElementById('screen-tarefas').classList.contains('active')) buildCalendar();
+            if(document.getElementById('screen-tarefas').classList.contains('active')) {buildCalendar(); buildTarefasHistorico();}
             if(document.getElementById('screen-mural').classList.contains('active')) buildMural();
             if(document.getElementById('screen-docs').classList.contains('active')) buildDocs();
             if(document.getElementById('screen-equipe').classList.contains('active')) buildEquipe();
+            if(document.getElementById('screen-niver').classList.contains('active')) buildNiver();
             checkNotifs();
         }
     } else {
@@ -702,7 +751,19 @@ window.save = function() {
     set(ref(database, 'tinoco_state'), S).catch(e => console.error("Erro salvando: ", e));
 }
 
-function initBench(){if(!S.schedule.bench.length)S.schedule.bench=S.people.map(p=>p.name)}
+function getDayState(day) {
+    if(day===undefined) day = S.schedule.currentDay;
+    return S.schedule.week[day];
+}
+
+function initBenchAllDays(){
+    for(let i=0; i<7; i++){
+        const st = S.schedule.week[i];
+        if(!st.bench.length && STORES.every(s => SHIFTS.every(sh => !st[s.id+'_'+sh.id].length))) {
+            st.bench = S.people.map(p=>p.name);
+        }
+    }
+}
 
 window.toggleAdminBtn = function(){adminTabVisible=!adminTabVisible;document.getElementById('adminTabBtn').style.display=adminTabVisible?'':'none'}
 window.setAuthTab = function(t){
@@ -758,9 +819,9 @@ window.doLogout = async function(){
 function startApp(){
   document.getElementById('auth-screen').style.display='none';
   document.getElementById('app').style.display='flex';
-  initBench();buildTabs();buildNav();
-  buildDayStrip();buildSchedule();buildPonto();buildCalendar();buildMural();buildDocs();buildSolicitacoes();buildEquipe();
-  startClock();populateFnFolga();populateTfFuncionario();checkNotifs();checkPendingTaskNotifs();
+  initBenchAllDays();buildTabs();buildNav();
+  buildDayStrip();buildSchedule();buildPonto();buildCalendar();buildTarefasHistorico();buildMural();buildDocs();buildSolicitacoes();buildEquipe();buildNiver();
+  startClock();populateFnFolga();populateTfFuncionario();populateBuscaFuncionario();checkNotifs();checkPendingTaskNotifs();
 }
 
 function buildNav(){
@@ -774,8 +835,10 @@ function buildNav(){
   document.getElementById('adminCalBtn').style.display=isAdmin?'flex':'none';
   document.getElementById('adminMuralBtn').style.display=isAdmin?'block':'none';
   document.getElementById('adminDocsBtn').style.display=isAdmin?'flex':'none';
+  document.getElementById('adminEquipeBtn').style.display=isAdmin?'block':'none';
   window.populateRelFuncionario();
   window.setDefaultRelMes();
+  window.setDefaultFiltrosData();
 }
 
 const ADMIN_TABS=[
@@ -786,8 +849,9 @@ const ADMIN_TABS=[
   {id:'mural',label:'Mural',icon:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
   {id:'docs',label:'Docs',icon:'<path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/>'},
   {id:'equipe',label:'Equipe',icon:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
+  {id:'niver',label:'Aniversários',icon:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'}
 ];
-const STAFF_TABS=ADMIN_TABS.slice(0,6);
+const STAFF_TABS=ADMIN_TABS.slice(0,8);
 
 function buildTabs(){
   const tabs=isAdmin?ADMIN_TABS:STAFF_TABS;
@@ -807,11 +871,12 @@ function showTab(id,btn){
   document.getElementById('screen-'+id).classList.add('active');
   if(btn)btn.classList.add('active');
   if(id==='solicitacoes')buildSolicitacoes();
-  if(id==='tarefas')buildCalendar();
+  if(id==='tarefas') {buildCalendar(); buildTarefasHistorico();}
   if(id==='mural')window.buildMural();
   if(id==='equipe')buildEquipe();
   if(id==='docs')buildDocs();
   if(id==='ponto')buildPonto();
+  if(id==='niver')buildNiver();
 }
 
 function startClock(){
@@ -837,24 +902,37 @@ function getTag(name){
   if(p.folga.includes(S.schedule.currentDay))return{label:'Folga',bg:'#F1EFE8',tx:'#5F5E5A'};
   return null;
 }
-function locOf(name){
-  for(const st of STORES)if(S.schedule.storeAssign[st.id].includes(name))return st.id;
-  if(S.schedule.bench.includes(name))return'bench';return null;
+function locOf(name, day){
+  const st = getDayState(day);
+  for(const s of STORES){
+      for(const sh of SHIFTS){
+          if(st[s.id+'_'+sh.id].includes(name)) return s.id+'_'+sh.id;
+      }
+  }
+  if(st.bench.includes(name)) return 'bench';
+  return null;
 }
-function removeFrom(name,from){
-  if(!from)return;
-  if(from==='bench')S.schedule.bench=S.schedule.bench.filter(n=>n!==name);
-  else if(S.schedule.storeAssign[from])S.schedule.storeAssign[from]=S.schedule.storeAssign[from].filter(n=>n!==name);
+function removeFrom(name, from, day){
+  if(!from) return;
+  const st = getDayState(day);
+  if(from==='bench') st.bench = st.bench.filter(n=>n!==name);
+  else if(st[from]) st[from] = st[from].filter(n=>n!==name);
 }
-function addTo(name,to){
-  if(to==='bench'){if(!S.schedule.bench.includes(name))S.schedule.bench.push(name);}
-  else if(S.schedule.storeAssign[to]&&!S.schedule.storeAssign[to].includes(name))S.schedule.storeAssign[to].push(name);
+function addTo(name, to, day){
+  const st = getDayState(day);
+  if(to==='bench'){if(!st.bench.includes(name)) st.bench.push(name);}
+  else if(st[to]&&!st[to].includes(name)) st[to].push(name);
 }
 function toast(msg,dur=2200){
   const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
   clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),dur);
 }
-function fmtDate(d){const dt=new Date(d);return dt.getDate()+'/'+(dt.getMonth()+1)+'/'+dt.getFullYear()}
+function fmtDate(d){
+  if(!d)return'';
+  const p=d.split('-');
+  if(p.length===3) return p[2]+'/'+p[1]+'/'+p[0];
+  const dt=new Date(d);return dt.getDate()+'/'+(dt.getMonth()+1)+'/'+dt.getFullYear();
+}
 function todayKey(){const n=new Date();return n.getFullYear()+'-'+(n.getMonth()+1)+'-'+n.getDate()}
 
 window.openSheet = function(id){document.getElementById(id).classList.add('open')}
@@ -868,7 +946,6 @@ function buildDayStrip(){
     btn.className='day-pill'+(i===S.schedule.currentDay?' active':'');
     btn.textContent=d;
     btn.onclick=()=>{
-      if(!isAdmin){toast('Apenas o administrador pode mudar a escala.');return}
       S.schedule.currentDay=i;window.save();buildDayStrip();buildSchedule();
     };
     strip.appendChild(btn);
@@ -906,7 +983,15 @@ function setupDrag(el,name,source){
   },{passive:false});
   el.addEventListener('touchend',()=>{
     if(ghost){ghost.remove();ghost=null}el.classList.remove('dragging');
-    if(touchTarget){const dest=touchTarget.dataset.dropzone;if(dest&&dest!==dragSrc){removeFrom(dragItem,dragSrc);addTo(dragItem,dest);window.save();buildSchedule();}clearDragOver();touchTarget=null;}
+    if(touchTarget){
+        const dest=touchTarget.dataset.dropzone;
+        if(dest&&dest!==dragSrc){
+            removeFrom(dragItem,dragSrc);
+            addTo(dragItem,dest);
+            window.save();buildSchedule();
+        }
+        clearDragOver();touchTarget=null;
+    }
     dragItem=null;dragSrc=null;
   });
 }
@@ -917,44 +1002,78 @@ function setupDropZone(el,storeId){
   el.addEventListener('dragleave',()=>el.classList.remove('drag-over'));
   el.addEventListener('drop',e=>{
     e.preventDefault();el.classList.remove('drag-over');if(!dragItem||!isAdmin)return;
-    if(storeId===dragSrc)return;removeFrom(dragItem,dragSrc);addTo(dragItem,storeId);window.save();buildSchedule();
+    if(storeId===dragSrc)return;
+    removeFrom(dragItem,dragSrc);
+    addTo(dragItem,storeId);
+    window.save();buildSchedule();
   });
 }
 
 function buildSchedule(){
-  STORES.forEach(s=>{S.schedule.storeAssign[s.id]=S.schedule.storeAssign[s.id].filter(n=>!isUnavail(n))});
+  const st = getDayState();
+  STORES.forEach(s=>{
+      SHIFTS.forEach(sh=>{
+          const sid=s.id+'_'+sh.id;
+          st[sid]=st[sid].filter(n=>!isUnavail(n));
+      });
+  });
+  
   const bench=document.getElementById('bench');bench.innerHTML='';setupDropZone(bench,'bench');
-  S.schedule.bench.filter(n=>!isUnavail(n)).forEach(n=>bench.appendChild(makeChip(n,'bench',false)));
+  st.bench.filter(n=>!isUnavail(n)).forEach(n=>bench.appendChild(makeChip(n,'bench',false)));
+  
   const area=document.getElementById('storesArea');area.innerHTML='';
   STORES.forEach(s=>{
-    const people=S.schedule.storeAssign[s.id].filter(n=>!isUnavail(n));
     const card=document.createElement('div');card.className='store-card';
-    card.innerHTML=`<div class="store-head"><div class="store-dot" style="background:${s.color}"></div><span class="store-name">${s.label}</span><span class="store-cnt">${people.length} pessoa${people.length!==1?'s':''}</span></div>`;
-    const zone=document.createElement('div');zone.className='drop-zone';setupDropZone(zone,s.id);
-    if(people.length===0)zone.innerHTML='<span style="font-size:11px;color:var(--text3);padding:4px 2px">Arraste funcionários aqui</span>';
-    else people.forEach(n=>zone.appendChild(makeChip(n,s.id,true)));
-    card.appendChild(zone);area.appendChild(card);
+    let totalPpl=0;
+    SHIFTS.forEach(sh=>{ totalPpl+=st[s.id+'_'+sh.id].filter(n=>!isUnavail(n)).length; });
+    card.innerHTML=`<div class="store-head"><div class="store-dot" style="background:${s.color}"></div><span class="store-name">${s.label}</span><span class="store-cnt">${totalPpl} pessoa${totalPpl!==1?'s':''}</span></div>`;
+    
+    SHIFTS.forEach(sh=>{
+        const sid=s.id+'_'+sh.id;
+        const people=st[sid].filter(n=>!isUnavail(n));
+        const shiftDiv=document.createElement('div');shiftDiv.className='shift-section';
+        shiftDiv.innerHTML=`<div class="shift-title">Turno: ${sh.label}</div>`;
+        const zone=document.createElement('div');zone.className='drop-zone';setupDropZone(zone,sid);
+        if(people.length===0)zone.innerHTML='<span style="font-size:11px;color:var(--text3);padding:4px 2px">Arraste aqui</span>';
+        else people.forEach(n=>zone.appendChild(makeChip(n,sid,true)));
+        shiftDiv.appendChild(zone);
+        card.appendChild(shiftDiv);
+    });
+    area.appendChild(card);
   });
   const inactives=S.people.filter(p=>isUnavail(p.name));
   const iSec=document.getElementById('inactiveSection');const iBox=document.getElementById('inactiveBox');
   if(inactives.length){iSec.style.display='block';iBox.innerHTML='';inactives.forEach(p=>iBox.appendChild(makeChip(p.name,'inactive',false)));}
   else iSec.style.display='none';
-  buildDayStrip();validate();
+  validate();
 }
+
 function validate(){
   const errors=[];
+  const st=getDayState();
   S.rules.forEach(r=>{
-    if(r.type==='nao_sozinho')STORES.forEach(s=>{const ppl=S.schedule.storeAssign[s.id].filter(n=>!isUnavail(n));if(ppl.includes(r.person)&&ppl.length===1)errors.push(`${r.person} não pode ficar sozinho(a).`)});
-    else if(r.type==='min_loja'){const s=STORES.find(x=>x.id===r.store);if(s){const ppl=S.schedule.storeAssign[s.id].filter(n=>!isUnavail(n));if(ppl.length>0&&ppl.length<r.min)errors.push(`${s.label}: mínimo ${r.min} pessoa(s).`)}}
+    if(r.type==='nao_sozinho')STORES.forEach(s=>{
+        let totalPpl=0;
+        SHIFTS.forEach(sh=>{ totalPpl+=st[s.id+'_'+sh.id].filter(n=>!isUnavail(n)).length; });
+        SHIFTS.forEach(sh=>{ 
+            const ppl=st[s.id+'_'+sh.id].filter(n=>!isUnavail(n));
+            if(ppl.includes(r.person)&&totalPpl===1)errors.push(`${r.person} não pode ficar sozinho(a) em ${s.label}.`);
+        });
+    });
   });
-  const unassigned=S.schedule.bench.filter(n=>!isUnavail(n)).length;
+  const unassigned=st.bench.filter(n=>!isUnavail(n)).length;
   const bar=document.getElementById('statusBar');const txt=document.getElementById('statusTxt');
   if(errors.length){bar.className='status-bar err';txt.textContent=errors[0]}
-  else if(unassigned>0){bar.className='status-bar warn';txt.textContent=`${unassigned} disponível(eis) sem loja.`}
-  else if(STORES.every(s=>!S.schedule.storeAssign[s.id].length)){bar.className='status-bar neu';txt.textContent='Distribua a equipa.'}
-  else{bar.className='status-bar ok';txt.textContent='Escala sem conflitos!'}
+  else if(unassigned>0){bar.className='status-bar warn';txt.textContent=`${unassigned} disponível(eis) sem loja neste dia.`}
+  else{bar.className='status-bar ok';txt.textContent='Escala do dia validada!'}
 }
-window.resetSchedule = function(){if(!isAdmin)return;STORES.forEach(s=>S.schedule.storeAssign[s.id]=[]);S.schedule.bench=S.people.map(p=>p.name);window.save();buildSchedule();toast('Escala reiniciada')}
+window.resetSchedule = function(){
+  if(!isAdmin)return;
+  const st=getDayState();
+  STORES.forEach(s=>SHIFTS.forEach(sh=>st[s.id+'_'+sh.id]=[]));
+  st.bench=S.people.map(p=>p.name);
+  window.save();buildSchedule();toast('Escala do dia reiniciada');
+}
 
 function buildPonto(){
   if(isAdmin){window.buildAllPonto();buildBancoHoras();return}
@@ -1054,6 +1173,37 @@ window.buildAllPonto = function(){
   if(!S.people.length)card.innerHTML='<div class="empty"><p>Nenhum funcionário cadastrado</p></div>';
 }
 
+window.populateBuscaFuncionario = function(){
+    const sel=document.getElementById('buscaPontoFunc');if(!sel)return;
+    sel.innerHTML=S.people.map(p=>`<option value="${p.name}">${p.name}</option>`).join('');
+}
+
+window.buscarPontoDia = function(){
+    const func=document.getElementById('buscaPontoFunc').value;
+    const dataVal=document.getElementById('buscaPontoData').value;
+    const res=document.getElementById('resultadoPontoDia');
+    if(!dataVal){toast('Selecione uma data');return;}
+    const [y,m,d] = dataVal.split('-');
+    const key=`${y}-${parseInt(m)}-${parseInt(d)}`;
+    const reg=(S.ponto[key]||{})[func];
+    if(!reg || !reg.entrada){
+        res.innerHTML=`<div class="empty" style="padding:10px"><p>${func} não tem registos no dia ${fmtDate(dataVal)}</p></div>`;
+        return;
+    }
+    const worked=calcWorkedMinutes(reg);
+    const saldo=calcSaldoDia(reg);
+    res.innerHTML=`
+      <div style="background:var(--card2);border-radius:var(--radius-xs);padding:10px">
+        <div style="font-weight:600;margin-bottom:6px">Jornada de ${func} em ${fmtDate(dataVal)}</div>
+        <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:4px"><span>Entrada:</span><span>${reg.entrada||'--'}</span></div>
+        <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:4px"><span>Saída Almoço:</span><span>${reg.saida_almoco||'--'}</span></div>
+        <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:4px"><span>Retorno Almoço:</span><span>${reg.retorno_almoco||'--'}</span></div>
+        <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:4px"><span>Saída Final:</span><span>${reg.saida||'--'}</span></div>
+        <div style="display:flex;justify-content:space-between;padding-top:4px"><span>Total Trabalhado:</span><span style="font-weight:bold">${worked!==null?minutesToHHMM(worked)+'h':'--'}</span></div>
+      </div>
+    `;
+}
+
 function getBancoHorasSaldo(personName){
   let totalSaldo=0;let diasComRegistro=0;
   Object.keys(S.ponto).forEach(dateKey=>{
@@ -1115,6 +1265,11 @@ window.populateRelFuncionario = function(){
 window.setDefaultRelMes = function(){
   const inp=document.getElementById('relMes');if(!inp)return;
   const n=new Date();inp.value=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');
+}
+window.setDefaultFiltrosData = function(){
+    const n=new Date();const val=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');
+    const fSol=document.getElementById('filtroMesSol');if(fSol)fSol.value=val;
+    const fTf=document.getElementById('filtroMesTf');if(fTf)fTf.value=val;
 }
 
 window.gerarRelatorioPonto = function(){
@@ -1203,13 +1358,29 @@ function buildSolicitacoes(){
   if(isAdmin){
     const pendentes=S.solicitacoes.filter(s=>s.status==='pendente');
     const pCard=document.getElementById('pendentesCard');pCard.innerHTML='';
-    if(!pendentes.length){pCard.innerHTML='<div class="empty"><p>Nenhuma pendência</p></div>';return}
-    pendentes.reverse().forEach(s=>{
-      const item=document.createElement('div');item.className='request-item';
-      item.innerHTML=`<div class="request-top"><span class="list-name">${s.userName}</span><span class="pill pill-blue">${s.tipo}</span></div><div class="request-body">${s.detalhes||''}<br><small>Data solicitada: ${fmtDate(s.data)}</small></div><div class="request-actions"><button class="btn btn-success btn-sm" onclick="decidirSol('${s.id}','deferido')">Deferir</button><button class="btn btn-danger btn-sm" onclick="decidirSol('${s.id}','indeferido')">Indeferir</button></div>`;
-      pCard.appendChild(item);
-    });
+    if(!pendentes.length){pCard.innerHTML='<div class="empty"><p>Nenhuma pendência</p></div>';}
+    else {
+        pendentes.reverse().forEach(s=>{
+          const item=document.createElement('div');item.className='request-item';
+          item.innerHTML=`<div class="request-top"><span class="list-name">${s.userName}</span><span class="pill pill-blue">${s.tipo}</span></div><div class="request-body">${s.detalhes||''}<br><small>Data solicitada: ${fmtDate(s.data)}</small></div><div class="request-actions"><button class="btn btn-success btn-sm" onclick="decidirSol('${s.id}','deferido')">Deferir</button><button class="btn btn-danger btn-sm" onclick="decidirSol('${s.id}','indeferido')">Indeferir</button></div>`;
+          pCard.appendChild(item);
+        });
+    }
     const dot=document.getElementById('dot-solicitacoes');if(dot)dot.classList.toggle('show',pendentes.length>0);
+    
+    const hCard=document.getElementById('historicoSolCard');hCard.innerHTML='';
+    const mesFiltro=document.getElementById('filtroMesSol').value;
+    const hist=S.solicitacoes.filter(s=>s.status!=='pendente' && s.data.startsWith(mesFiltro));
+    if(!hist.length) hCard.innerHTML='<div class="empty"><p>Nenhum histórico no mês selecionado</p></div>';
+    else {
+        hist.reverse().forEach(s=>{
+            const item=document.createElement('div');item.className='request-item';
+            const statusPill=s.status==='deferido'?'pill-green':'pill-red';
+            const justHtml=s.justificativa?`<div style="font-size:11px; color:var(--text2); margin-top:4px"><b>Justificativa:</b> ${s.justificativa}</div>`:'';
+            item.innerHTML=`<div class="request-top"><span class="list-name">${s.userName} | ${s.tipo}</span><span class="pill ${statusPill}">${s.status}</span></div><div class="request-body"><small>Ref: ${fmtDate(s.data)}</small>${justHtml}</div>`;
+            hCard.appendChild(item);
+        });
+    }
   }
 }
 
@@ -1232,6 +1403,7 @@ window.enviarSolicitacao = function(){
 window.decidirSol = function(id,decisao){
   const sol=S.solicitacoes.find(s=>s.id===id);if(!sol)return;
   const justificativaTexto=prompt('Justificativa para a decisão tomada (opcional):');
+  if(justificativaTexto===null) return; 
   sol.status=decisao;
   sol.justificativa=justificativaTexto||'';
   window.save();buildSolicitacoes();toast('Solicitação '+decisao);
@@ -1263,7 +1435,7 @@ window.salvarRecado = function(){
   const titulo=document.getElementById('recTitulo').value.trim();
   const texto=document.getElementById('recTexto').value.trim();
   if(!titulo||!texto){toast('Preencha título e mensagem para publicar');return}
-  S.recados.push({id:Date.now().toString(),titulo,texto,data:new Date().toISOString(),cientes:[]});
+  S.recados.push({id:Date.now().toString(),titulo,texto,data:todayKey(),cientes:[]});
   window.save();closeSheet('sheetRecado');window.buildMural();toast('Recado publicado com sucesso');
 }
 
@@ -1313,8 +1485,12 @@ function buildCalendar(){
   for(let d=1;d<=daysInMonth;d++){
     const el=document.createElement('div');
     const isToday=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d;
-    const dateStr=calYear+'-'+(calMonth+1)+'-'+d;
-    const hasTasks=S.tarefas.some(t=>t.data===dateStr&&(isAdmin||t.funcionario==='todos'||t.funcionario===currentUser.name));
+    const dateStr=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const hasTasks=S.tarefas.some(t=>{
+        if(t.feita) return false;
+        if(t.data!==dateStr && t.data!==`${calYear}-${calMonth+1}-${d}`) return false;
+        return isAdmin||t.funcionario==='todos'||t.funcionario===currentUser.name;
+    });
     el.className='cal-day'+(isToday?' today':'')+(hasTasks?' has-task':'');
     el.textContent=d;
     el.onclick=()=>{calSelectedDay=new Date(calYear,calMonth,d);buildTarefasList()};
@@ -1325,20 +1501,36 @@ function buildCalendar(){
 
 function buildTarefasList(){
   const d=calSelectedDay;
-  const dateStr=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+  const dateStr=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const dateStrAlt=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
   const label=document.getElementById('calDayLabel');
   const today=new Date();const isToday=today.toDateString()===d.toDateString();
-  label.textContent=isToday?'Tarefas de hoje':`Tarefas de ${d.getDate()} de ${MONTHS[d.getMonth()]}`;
+  label.textContent=isToday?'Tarefas pendentes hoje':`Pendentes dia ${d.getDate()}`;
   const list=document.getElementById('tarefasList');list.innerHTML='';
-  const tarefas=S.tarefas.filter(t=>t.data===dateStr&&(isAdmin||t.funcionario==='todos'||t.funcionario===currentUser.name));
+  const tarefas=S.tarefas.filter(t=>!t.feita && (t.data===dateStr||t.data===dateStrAlt) &&(isAdmin||t.funcionario==='todos'||t.funcionario===currentUser.name));
   if(!tarefas.length){list.innerHTML='<div class="empty"><p>Sem tarefas neste dia</p></div>';return}
   tarefas.sort((a,b)=>{const o={urgente:0,normal:1,baixa:2};return o[a.prioridade]-o[b.prioridade]}).forEach(t=>{
     const item=document.createElement('div');item.className='task-item';
     const quem=t.funcionario==='todos'?'Todos':t.funcionario;
-    const checkBtn=(isAdmin||!t.feita)?`<button class="btn btn-ghost btn-sm btn-icon" onclick="toggleTarefa('${t.id}')" title="Marcar conclusão">✓</button>`:'';
+    const checkBtn=`<button class="btn btn-ghost btn-sm btn-icon" onclick="toggleTarefa('${t.id}')" title="Marcar conclusão">✓</button>`;
     const removeBtn=isAdmin?`<button class="btn btn-ghost btn-sm btn-icon" onclick="removerTarefa('${t.id}')" title="Remover">✕</button>`:'';
-    item.innerHTML=`<div class="task-prio" style="background:${PRIO_COLORS[t.prioridade]}"></div><div class="task-info"><div class="task-title ${t.feita?'task-done':''}">${t.titulo}</div><div class="task-meta">${t.hora||''} ${t.hora&&quem?'|':''} ${quem||''}</div>${t.desc?`<div class="task-who">${t.desc}</div>`:''}</div><span class="pill" style="background:${PRIO_COLORS[t.prioridade]}22;color:${PRIO_COLORS[t.prioridade]};border-color:${PRIO_COLORS[t.prioridade]}44">${PRIO_LABELS[t.prioridade]}</span>${checkBtn}${removeBtn}`;
+    item.innerHTML=`<div class="task-prio" style="background:${PRIO_COLORS[t.prioridade]}"></div><div class="task-info"><div class="task-title">${t.titulo}</div><div class="task-meta">${t.hora||''} ${t.hora&&quem?'|':''} ${quem||''}</div>${t.desc?`<div class="task-who">${t.desc}</div>`:''}</div><span class="pill" style="background:${PRIO_COLORS[t.prioridade]}22;color:${PRIO_COLORS[t.prioridade]};border-color:${PRIO_COLORS[t.prioridade]}44">${PRIO_LABELS[t.prioridade]}</span>${checkBtn}${removeBtn}`;
     list.appendChild(item);
+  });
+}
+
+window.buildTarefasHistorico = function(){
+  const hList=document.getElementById('tarefasHistList');if(!hList)return;
+  hList.innerHTML='';
+  const mesFiltro=document.getElementById('filtroMesTf').value;
+  if(!mesFiltro) return;
+  const hist=S.tarefas.filter(t=>t.feita && t.data.startsWith(mesFiltro) && (isAdmin||t.funcionario==='todos'||t.funcionario===currentUser.name));
+  if(!hist.length){hList.innerHTML='<div class="empty"><p>Nenhuma tarefa finalizada neste mês</p></div>';return}
+  hist.forEach(t=>{
+    const item=document.createElement('div');item.className='task-item';
+    const quem=t.funcionario==='todos'?'Todos':t.funcionario;
+    item.innerHTML=`<div class="task-prio" style="background:${PRIO_COLORS[t.prioridade]}"></div><div class="task-info"><div class="task-title task-done">${t.titulo}</div><div class="task-meta">${fmtDate(t.data)} ${t.hora||''} | ${quem||''}</div></div><button class="btn btn-ghost btn-sm btn-icon" onclick="toggleTarefa('${t.id}')" title="Desfazer">↺</button>`;
+    hList.appendChild(item);
   });
 }
 
@@ -1346,7 +1538,8 @@ window.toggleTarefa = function(id){
   const t=S.tarefas.find(x=>x.id===id);
   if(t){
       t.feita=!t.feita;
-      window.save();buildTarefasList();
+      window.save();buildCalendar();buildTarefasHistorico();
+      toast(t.feita?'Tarefa marcada como concluída':'Tarefa reaberta');
   }
 }
 window.removerTarefa = function(id){S.tarefas=S.tarefas.filter(x=>x.id!==id);window.save();buildCalendar()}
@@ -1385,22 +1578,60 @@ function buildEquipe(){
     const row=document.createElement('div');row.className='list-row';
     const loja=STORES.find(s=>s.id===p.loja);
     const folhaStr=p.folga.length?'Folga: '+p.folga.map(d=>DAYS[d]).join(', '):'Sem folga fixa';
+    const niverStr=p.nascimento?` | Nasc: ${fmtDate(p.nascimento)}`:'';
     const stBtn=(s)=>`<button class="pill ${p.status===s?'pill-'+(s==='ativo'?'green':s==='ferias'?'yellow':'red'):''}" onclick="setStatus('${p.name}','${s}')" style="cursor:pointer">${s.charAt(0).toUpperCase()+s.slice(1)}</button>`;
-    row.innerHTML=`<div class="list-av av-${ci}">${initials(p.name)}</div><div class="list-info"><div class="list-name">${p.name}</div><div class="list-sub">${(loja||{label:''}).label} | ${folhaStr}</div><div class="list-sub" style="color:var(--text3)">${p.email}</div></div><div class="list-right" style="flex-direction:column;align-items:flex-end;gap:4px">${stBtn('ativo')}${stBtn('ferias')}${stBtn('licenca')}<button class="pill pill-red" onclick="removerFuncionario('${p.name}')" style="cursor:pointer;margin-top:2px">Remover</button></div>`;
+    
+    let adminAcoes='';
+    if(isAdmin){
+        adminAcoes=`<div class="list-right" style="flex-direction:column;align-items:flex-end;gap:4px">
+            <div>${stBtn('ativo')}${stBtn('ferias')}${stBtn('licenca')}</div>
+            <div style="display:flex;gap:4px;margin-top:2px">
+                <button class="pill pill-blue" onclick="editarFuncionario('${p.name}')" style="cursor:pointer">Editar</button>
+                <button class="pill pill-red" onclick="removerFuncionario('${p.name}')" style="cursor:pointer">Remover</button>
+            </div>
+        </div>`;
+    }
+    
+    row.innerHTML=`<div class="list-av av-${ci}">${initials(p.name)}</div><div class="list-info"><div class="list-name">${p.name}</div><div class="list-sub">${(loja||{label:''}).label} | ${folhaStr}${niverStr}</div><div class="list-sub" style="color:var(--text3)">${p.email}</div></div>${adminAcoes}`;
     list.appendChild(row);
+  });
+}
+
+function buildNiver(){
+  const list=document.getElementById('niverList');if(!list)return;
+  list.innerHTML='';
+  const comNiver = S.people.filter(p=>p.nascimento).map(p=>{
+      const [y,m,d] = p.nascimento.split('-');
+      return {name:p.name, loja:p.loja, color:p.color, month:parseInt(m), day:parseInt(d), full:p.nascimento};
+  });
+  if(!comNiver.length){list.innerHTML='<div class="empty"><p>Nenhuma data de nascimento registada</p></div>';return}
+  
+  comNiver.sort((a,b)=>{
+      if(a.month!==b.month) return a.month-b.month;
+      return a.day-b.day;
+  });
+  
+  comNiver.forEach(p=>{
+      const row=document.createElement('div');row.className='list-row';
+      const loja=STORES.find(s=>s.id===p.loja);
+      const ci=p.color%PALETTE_COUNT;
+      row.innerHTML=`<div class="list-av av-${ci}">🎂</div><div class="list-info"><div class="list-name">${p.name}</div><div class="list-sub">${(loja||{label:''}).label}</div></div><div style="font-weight:700;color:var(--accent)">${String(p.day).padStart(2,'0')}/${String(p.month).padStart(2,'0')}</div>`;
+      list.appendChild(row);
   });
 }
 
 window.setStatus = function(name,status){
   const p=getPerson(name);if(!p)return;p.status=status;
-  if(status!=='ativo'){removeFrom(name,locOf(name))}
-  else if(!locOf(name))addTo(name,'bench');
+  if(status!=='ativo'){ 
+      for(let i=0; i<7; i++) removeFrom(name,locOf(name, i), i); 
+  }
   window.save();buildEquipe();buildSchedule();toast(`${name}: ${status}`);
 }
 
 window.removerFuncionario = function(name){
   if(!confirm(`Remover permanentemente?`))return;
-  removeFrom(name,locOf(name));S.people=S.people.filter(p=>p.name!==name);S.schedule.bench=S.schedule.bench.filter(n=>n!==name);
+  for(let i=0; i<7; i++) removeFrom(name,locOf(name, i), i);
+  S.people=S.people.filter(p=>p.name!==name);
   window.save();buildEquipe();buildSchedule();populateTfFuncionario();toast(`Removido`);
 }
 
@@ -1416,24 +1647,62 @@ function populateFnFolga(){
   });
 }
 
-window.cadastrarFuncionario = async function(){
+window.abrirNovoFuncionario = function(){
+  document.getElementById('fnSheetTitle').textContent='Cadastrar funcionário';
+  document.getElementById('fnOldName').value='';
+  document.getElementById('fnNome').value='';
+  document.getElementById('fnNome').disabled=false;
+  document.getElementById('fnEmail').value='';
+  document.getElementById('fnSenha').value='';
+  document.getElementById('fnNasc').value='';
+  document.querySelectorAll('#fnFolgaGrid .day-chk').forEach(b=>b.classList.remove('sel'));
+  openSheet('sheetFuncionario');
+}
+
+window.editarFuncionario = function(name){
+  const p=getPerson(name);if(!p)return;
+  document.getElementById('fnSheetTitle').textContent='Editar funcionário';
+  document.getElementById('fnOldName').value=p.name;
+  document.getElementById('fnNome').value=p.name;
+  document.getElementById('fnNome').disabled=true;
+  document.getElementById('fnEmail').value=p.email;
+  document.getElementById('fnSenha').value=p.pass;
+  document.getElementById('fnLoja').value=p.loja;
+  document.getElementById('fnNasc').value=p.nascimento||'';
+  document.querySelectorAll('#fnFolgaGrid .day-chk').forEach(b=>{
+      b.classList.toggle('sel', p.folga.includes(parseInt(b.dataset.day)));
+  });
+  openSheet('sheetFuncionario');
+}
+
+window.salvarFuncionario = async function(){
+  const oldName=document.getElementById('fnOldName').value;
   const nome=document.getElementById('fnNome').value.trim();
   const email=document.getElementById('fnEmail').value.trim().toLowerCase();
   const pass=document.getElementById('fnSenha').value;
   const loja=document.getElementById('fnLoja').value;
-  if(!nome||!email||pass.length<6){toast('Preencha tudo com senha maior que 6 caracteres');return}
-  if(S.people.find(p=>p.email.toLowerCase()===email)){toast('Correio eletrónico já cadastrado');return}
+  const nasc=document.getElementById('fnNasc').value;
   
+  if(!nome||!email||pass.length<6){toast('Preencha os dados (senha mín. 6)');return}
   const folga=[...document.querySelectorAll('#fnFolgaGrid .day-chk.sel')].map(b=>parseInt(b.dataset.day));
-  S.palIdx=(S.palIdx+1)%PALETTE_COUNT;
   
-  const p={name:nome,email,pass,loja,folga,status:'ativo',color:S.palIdx};
-  S.people.push(p);addTo(nome,'bench');window.save();
-  closeSheet('sheetFuncionario');buildEquipe();buildSchedule();populateTfFuncionario();
+  if(oldName){
+      const p=getPerson(oldName);
+      if(p){
+          p.email=email; p.pass=pass; p.loja=loja; p.folga=folga; p.nascimento=nasc;
+          toast('Dados atualizados!');
+      }
+  } else {
+      if(S.people.find(p=>p.email.toLowerCase()===email)){toast('Correio eletrónico já cadastrado');return}
+      S.palIdx=(S.palIdx+1)%PALETTE_COUNT;
+      const p={name:nome,email,pass,loja,folga,nascimento:nasc,status:'ativo',color:S.palIdx};
+      S.people.push(p);
+      for(let i=0; i<7; i++) addTo(nome,'bench', i);
+      toast(`Cadastrado com sucesso!`);
+  }
   
-  toast(`Cadastrado com sucesso!`);
-  document.getElementById('fnNome').value='';document.getElementById('fnEmail').value='';document.getElementById('fnSenha').value='';
-  document.querySelectorAll('#fnFolgaGrid .day-chk').forEach(b=>b.classList.remove('sel'));
+  window.save();
+  closeSheet('sheetFuncionario');buildEquipe();buildSchedule();populateTfFuncionario();buildNiver();
 }
 
 function checkNotifs(){
@@ -1481,7 +1750,7 @@ function checkPendingTaskNotifs(){
 }
 
 const hojeStart=new Date();
-const todayDateStr=hojeStart.getFullYear()+'-'+(hojeStart.getMonth()+1)+'-'+hojeStart.getDate();
+const todayDateStr=hojeStart.getFullYear()+'-'+String(hojeStart.getMonth()+1).padStart(2,'0')+'-'+String(hojeStart.getDate()).padStart(2,'0');
 document.getElementById('tfData').value=todayDateStr;
 document.getElementById('solData').value=todayDateStr;
 </script>
