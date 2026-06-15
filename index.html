@@ -7,9 +7,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Tinoco Tech Cell">
 <meta name="theme-color" content="#27292f">
-<title>Tinoco Tech Cell — Sistema Interno</title>
+<title>Tinoco Tech Cell | Sistema Interno</title>
 <style>
-/* O seu CSS original foi mantido 100% intacto */
 :root{
   --bg:#f4f4f6;--card:#ffffff;--card2:#eeeff2;--border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.05);
   --text:#1a1b1f;--text2:#64748b;--text3:#94a3b8;
@@ -359,13 +358,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 
       <div id="adminPontoSection" style="display:none">
         <div style="display:flex;align-items:center;gap:8px;margin:12px 0 8px;flex-wrap:wrap">
-          <div class="section-title" style="margin:0;flex:1">Ponto em tempo real — hoje</div>
+          <div class="section-title" style="margin:0;flex:1">Ponto em tempo real hoje</div>
           <button class="btn btn-ghost btn-sm" onclick="buildAllPonto()" style="gap:4px">↺ Atualizar</button>
         </div>
         <div class="card" id="allPontoCard"></div>
 
         <div style="display:flex;align-items:center;gap:8px;margin:14px 0 8px;flex-wrap:wrap">
-          <div class="section-title" style="margin:0;flex:1">Banco de horas — equipe</div>
+          <div class="section-title" style="margin:0;flex:1">Banco de horas equipe</div>
         </div>
         <div class="card" id="bancoBhCard"></div>
 
@@ -505,8 +504,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
         <option value="outro">Outro</option>
       </select>
     </div>
-    <div class="field"><label>Link do PDF (Google Drive, Dropbox etc.)</label><input type="url" id="docUrl" placeholder="https://..."></div>
-    <div class="field"><label>Observação (opcional)</label><textarea id="docObs" placeholder="Breve descrição..."></textarea></div>
+    <div class="field"><label>Link do PDF</label><input type="url" id="docUrl" placeholder="https://..."></div>
+    <div class="field"><label>Observação</label><textarea id="docObs" placeholder="Breve descrição..."></textarea></div>
     <button class="btn btn-accent btn-full" onclick="salvarDoc()" style="margin-top:4px">Adicionar documento</button>
     <button class="btn btn-ghost btn-full" onclick="closeSheet('sheetDoc')" style="margin-top:8px">Cancelar</button>
   </div>
@@ -582,20 +581,6 @@ const PRIO_COLORS={urgente:'#dc2626',normal:'#d97706',baixa:'#16a34a'};
 const PRIO_LABELS={urgente:'Urgente',normal:'Normal',baixa:'Baixa'};
 const SOL_LABELS={troca_horario:'Troca de horário',dispensa:'Dispensa',ajuste_ponto:'Ajuste de ponto',abono:'Abono de dia'};
 
-let S = {
-  users:{}, schedule:{storeAssign:{icarai:[],itaipu:[],maravista:[]},bench:[],currentDay:new Date().getDay()}, rules:[{type:'nao_sozinho',person:'Pedro'},{type:'min_loja',store:'icarai',min:2}], solicitacoes:[],tarefas:[],docs:[],ponto:{},notifs:[],palIdx:0,
-  people:[
-    {name:'Pedro',email:'pedro@tinoco.com',pass:'pedro123',loja:'icarai',folga:[],status:'ativo',color:0},
-    {name:'Duda',email:'duda@tinoco.com',pass:'duda123',loja:'icarai',folga:[2],status:'ativo',color:1},
-    {name:'Larissa',email:'larissa@tinoco.com',pass:'larissa123',loja:'itaipu',folga:[1],status:'ativo',color:2},
-    {name:'Gabriela',email:'gabriela@tinoco.com',pass:'gabri123',loja:'maravista',folga:[],status:'ativo',color:3},
-    {name:'Welyton',email:'welyton@tinoco.com',pass:'wely123',loja:'itaipu',folga:[],status:'ativo',color:4},
-    {name:'Lessa',email:'lessa@tinoco.com',pass:'lessa123',loja:'maravista',folga:[],status:'ativo',color:5},
-    {name:'Nathália',email:'nathalia@tinoco.com',pass:'nath123',loja:'icarai',folga:[],status:'ativo',color:6},
-    {name:'Willy',email:'willy@tinoco.com',pass:'willy123',loja:'maravista',folga:[],status:'ativo',color:7},
-  ]
-};
-
 let currentUser=null;
 let isAdmin=false;
 let selectedPontoType=null;
@@ -603,13 +588,42 @@ let calYear=new Date().getFullYear();
 let calMonth=new Date().getMonth();
 let calSelectedDay=new Date();
 let dragItem=null,dragSrc=null,ghost=null,touchTarget=null;
+let S = {};
 
-// 🔥 Escuta o Firebase Realtime Database
+function sanitizeState(data) {
+    let res = data || {};
+    if(!res.users) res.users = {};
+    if(!res.schedule) res.schedule = {};
+    if(!res.schedule.storeAssign) res.schedule.storeAssign = {icarai:[], itaipu:[], maravista:[]};
+    STORES.forEach(s => { if(!res.schedule.storeAssign[s.id]) res.schedule.storeAssign[s.id] = []; });
+    if(!res.schedule.bench) res.schedule.bench = [];
+    if(res.schedule.currentDay === undefined) res.schedule.currentDay = new Date().getDay();
+    if(!res.rules) res.rules = [{type:'nao_sozinho',person:'Pedro'},{type:'min_loja',store:'icarai',min:2}];
+    if(!res.solicitacoes) res.solicitacoes = [];
+    if(!res.tarefas) res.tarefas = [];
+    if(!res.docs) res.docs = [];
+    if(!res.ponto) res.ponto = {};
+    if(!res.notifs) res.notifs = [];
+    if(!res.people || res.people.length === 0) {
+        res.people = [
+            {name:'Pedro',email:'pedro@tinoco.com',pass:'pedro123',loja:'icarai',folga:[],status:'ativo',color:0},
+            {name:'Duda',email:'duda@tinoco.com',pass:'duda123',loja:'icarai',folga:[2],status:'ativo',color:1},
+            {name:'Larissa',email:'larissa@tinoco.com',pass:'larissa123',loja:'itaipu',folga:[1],status:'ativo',color:2},
+            {name:'Gabriela',email:'gabriela@tinoco.com',pass:'gabri123',loja:'maravista',folga:[],status:'ativo',color:3},
+            {name:'Welyton',email:'welyton@tinoco.com',pass:'wely123',loja:'itaipu',folga:[],status:'ativo',color:4},
+            {name:'Lessa',email:'lessa@tinoco.com',pass:'lessa123',loja:'maravista',folga:[],status:'ativo',color:5},
+            {name:'Nathália',email:'nathalia@tinoco.com',pass:'nath123',loja:'icarai',folga:[],status:'ativo',color:6},
+            {name:'Willy',email:'willy@tinoco.com',pass:'willy123',loja:'maravista',folga:[],status:'ativo',color:7}
+        ];
+    }
+    if(!res.palIdx) res.palIdx = 0;
+    return res;
+}
+
 onValue(ref(database, 'tinoco_state'), (snapshot) => {
     const data = snapshot.val();
     if (data) {
-        S = data;
-        // Atualiza a tela automaticamente se houver alguém logado
+        S = sanitizeState(data);
         if (currentUser) {
             initBench();
             if(document.getElementById('screen-escala').classList.contains('active')) buildSchedule();
@@ -621,19 +635,17 @@ onValue(ref(database, 'tinoco_state'), (snapshot) => {
             checkNotifs();
         }
     } else {
-        // Primeira rodada: salva o S original no Firebase
-        save();
+        S = sanitizeState(null);
+        window.save();
     }
 });
 
-// 🔥 Substitui o localStorage pela Nuvem
 window.save = function() {
     set(ref(database, 'tinoco_state'), S).catch(e => console.error("Erro salvando: ", e));
 }
 
 function initBench(){if(!S.schedule.bench.length)S.schedule.bench=S.people.map(p=>p.name)}
 
-// ── AUTH FIREBASE ──
 let adminTabVisible=false;
 window.toggleAdminBtn = function(){adminTabVisible=!adminTabVisible;document.getElementById('adminTabBtn').style.display=adminTabVisible?'':'none'}
 window.setAuthTab = function(t){
@@ -646,31 +658,27 @@ window.doLogin = async function() {
   const email=document.getElementById('loginEmail').value.trim().toLowerCase();
   const pass=document.getElementById('loginPass').value;
   const p=S.people.find(x=>x.email.toLowerCase()===email);
-  
-  if(!p){
-      document.getElementById('loginError').textContent='E-mail incorreto.'; return;
-  }
+  if(!p){document.getElementById('loginError').textContent='E-mail incorreto.'; return;}
   document.getElementById('loginError').textContent='Conectando...';
 
   try {
       await signInWithEmailAndPassword(auth, email, pass);
       currentUser=p; isAdmin=false; startApp();
   } catch (err) {
-      // 🔥 MIGRADOR MÁGICO: Se falhar (usuário não está no Firebase Auth), mas a senha antiga bater, ele cria e loga sozinho!
       if(err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential' || err.code === 'auth/invalid-login-credentials') {
           if(p.pass === pass) {
               try {
                   await createUserWithEmailAndPassword(auth, email, pass);
                   currentUser=p; isAdmin=false; startApp();
-                  toast('Sua conta foi migrada para nuvem!');
+                  toast('Sua conta foi criada na nuvem com sucesso!');
               } catch (err2) {
-                  document.getElementById('loginError').textContent='A senha deve ter mín. 6 caracteres.';
+                  document.getElementById('loginError').textContent='A senha deve ter pelo menos 6 caracteres.';
               }
           } else {
               document.getElementById('loginError').textContent='E-mail ou senha incorretos.';
           }
       } else {
-          document.getElementById('loginError').textContent='Erro no login: ' + err.message;
+          document.getElementById('loginError').textContent='Erro no login. Verifique sua conexão.';
       }
   }
 }
@@ -698,10 +706,10 @@ function startApp(){
   startClock();populateFnFolga();populateTfFuncionario();checkNotifs();checkPendingTaskNotifs();
 }
 
-// ── O restante do seu código (adaptado para o window global) ──
 function buildNav(){
+  const lojaFuncionario = isAdmin ? {label:''} : STORES.find(s=>s.id===currentUser.loja) || {label:''};
   document.getElementById('navTitle').textContent=isAdmin?'Painel admin':('Olá, '+currentUser.name.split(' ')[0]);
-  document.getElementById('navSub').textContent=isAdmin?'Tinoco Tech Cell — Administrador':('Tinoco Tech Cell · '+(STORES.find(s=>s.id===currentUser.loja)||{label:''}).label);
+  document.getElementById('navSub').textContent=isAdmin?'Tinoco Tech Cell | Administrador':('Tinoco Tech Cell | '+lojaFuncionario.label);
   document.getElementById('adminEscalaControls').style.display=isAdmin?'block':'none';
   document.getElementById('staffPontoSection').style.display=isAdmin?'none':'block';
   document.getElementById('adminPontoSection').style.display=isAdmin?'block':'none';
@@ -888,14 +896,6 @@ function validate(){
 }
 window.resetSchedule = function(){if(!isAdmin)return;STORES.forEach(s=>S.schedule.storeAssign[s.id]=[]);S.schedule.bench=S.people.map(p=>p.name);window.save();buildSchedule();toast('Escala reiniciada')}
 
-const PONTO_TYPES=[
-  {id:'entrada',label:'Entrada',icon:'🟢'},
-  {id:'saida_almoco',label:'Saída almoço',icon:'🍽️'},
-  {id:'retorno_almoco',label:'Retorno almoço',icon:'↩️'},
-  {id:'saida',label:'Saída da loja',icon:'🔴'},
-];
-const JORNADA_HORAS=8;
-
 function buildPonto(){
   if(isAdmin){buildAllPonto();buildBancoHoras();return}
   const grid=document.getElementById('pontoGrid');grid.innerHTML='';
@@ -985,7 +985,7 @@ window.buildAllPonto = function(){
       <div class="list-av av-${ci}" style="width:32px;height:32px;font-size:11px">${initials(p.name)}</div>
       <div class="bh-info">
         <div class="bh-name">${p.name}</div>
-        <div class="bh-detail" style="color:${statusColor[status]}">${statusLabel[status]}${reg.entrada?' · Entrada: '+reg.entrada:''}${workedStr?' · '+workedStr:''}</div>
+        <div class="bh-detail" style="color:${statusColor[status]}">${statusLabel[status]}${reg.entrada?' | Entrada: '+reg.entrada:''}${workedStr?' | '+workedStr:''}</div>
       </div>
       <div style="text-align:right;flex-shrink:0">
         ${reg.entrada?`<div style="font-size:10px;color:var(--text3)">${reg.saida_almoco?'🍽 '+reg.saida_almoco:''}${reg.retorno_almoco?' ↩ '+reg.retorno_almoco:''}</div>`:''}
@@ -1019,7 +1019,7 @@ function buildBancoHoras(){
       <div class="bh-av av-${ci}">${initials(p.name)}</div>
       <div class="bh-info">
         <div class="bh-name">${p.name}</div>
-        <div class="bh-detail">${diasComRegistro} dia(s) com registro · Jornada: ${JORNADA_HORAS}h/dia</div>
+        <div class="bh-detail">${diasComRegistro} dia(s) com registro | Jornada: ${JORNADA_HORAS}h/dia</div>
       </div>
       <div class="bh-saldo ${saldoClass}">${saldoStr}</div>`;
     card.appendChild(row);
@@ -1046,7 +1046,7 @@ function buildBancoHorasStaff(){
           <div style="font-size:11px;color:var(--text2);margin-top:3px">Trabalhado hoje</div>
         </div>
       </div>
-      <div style="margin-top:10px;font-size:11px;color:var(--text3);text-align:center">${diasComRegistro} dia(s) com registro · Jornada padrão: ${JORNADA_HORAS}h</div>
+      <div style="margin-top:10px;font-size:11px;color:var(--text3);text-align:center">${diasComRegistro} dia(s) com registro | Jornada padrão: ${JORNADA_HORAS}h</div>
     </div>`;
 }
 
@@ -1083,17 +1083,17 @@ window.gerarRelatorioPonto = function(){
   const totalSaldo=registros.reduce((a,r)=>a+(r.saldo||0),0);
   const diasTrabalhados=registros.filter(r=>r.worked!==null&&r.worked>0).length;
   const mesNome=MONTHS[mes-1];
-  const loja=STORES.find(s=>s.id===p.loja)||{label:'—'};
+  const loja=STORES.find(s=>s.id===p.loja)||{label:''};
 
   const linhas=registros.map(r=>{
     const isWeekend=r.diaSemana==='Dom'||r.diaSemana==='Sáb';
     const bg=isWeekend?'#f8f8f8':'#fff';
-    const entrada=r.reg?.entrada||'—';
-    const sAlmoco=r.reg?.saida_almoco||'—';
-    const rAlmoco=r.reg?.retorno_almoco||'—';
-    const saida=r.reg?.saida||'—';
-    const workedStr=r.worked!==null?minutesToHHMM(r.worked)+'h':'—';
-    const saldoStr=r.saldo!==null?((r.saldo>=0?'+':'')+minutesToHHMM(r.saldo)+'h'):'—';
+    const entrada=r.reg?.entrada||'';
+    const sAlmoco=r.reg?.saida_almoco||'';
+    const rAlmoco=r.reg?.retorno_almoco||'';
+    const saida=r.reg?.saida||'';
+    const workedStr=r.worked!==null?minutesToHHMM(r.worked)+'h':'';
+    const saldoStr=r.saldo!==null?((r.saldo>=0?'+':'')+minutesToHHMM(r.saldo)+'h'):'';
     const saldoColor=r.saldo===null?'#999':r.saldo>0?'#16a34a':r.saldo<0?'#dc2626':'#888';
     return `<tr style="background:${bg}">
       <td>${String(r.dia).padStart(2,'0')}</td>
@@ -1111,11 +1111,11 @@ window.gerarRelatorioPonto = function(){
   const saldoTotalStr=(totalSaldo>=0?'+':'')+minutesToHHMM(totalSaldo)+'h';
 
   const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
-<title>Relatório de Ponto — ${nomeFun}</title>
+<title>Relatório de Ponto | ${nomeFun}</title>
 <style>
 body{font-family:Arial,sans-serif;font-size:11px;padding:30px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px;text-align:center}th{background:#333;color:#fff}
 </style></head><body>
-<h1>Relatório de Ponto: ${nomeFun} - ${mesNome}/${ano}</h1>
+<h1>Relatório de Ponto: ${nomeFun} | ${mesNome}/${ano}</h1>
 <table>
   <thead><tr><th>Dia</th><th>Semana</th><th>Entrada</th><th>Saída almoço</th><th>Retorno</th><th>Saída</th><th>Trabalhado</th><th>Saldo</th></tr></thead>
   <tbody>${linhas}</tbody>
@@ -1137,7 +1137,7 @@ function buildSolicitacoes(){
     minhasList.reverse().forEach(s=>{
       const item=document.createElement('div');item.className='request-item';
       const statusPill=s.status==='pendente'?'pill-yellow':s.status==='aprovado'?'pill-green':'pill-red';
-      item.innerHTML=`<div class="request-top"><span class="list-name">${SOL_LABELS[s.tipo]||s.tipo}</span><span class="pill ${statusPill}">${s.status}</span></div><div class="request-body">${s.detalhes||'—'}<br><small>${fmtDate(s.data)}</small></div>`;
+      item.innerHTML=`<div class="request-top"><span class="list-name">${SOL_LABELS[s.tipo]||s.tipo}</span><span class="pill ${statusPill}">${s.status}</span></div><div class="request-body">${s.detalhes||''}<br><small>${fmtDate(s.data)}</small></div>`;
       card.appendChild(item);
     });
   }
@@ -1147,7 +1147,7 @@ function buildSolicitacoes(){
     if(!pendentes.length){pCard.innerHTML='<div class="empty"><p>Nenhuma pendência</p></div>';return}
     pendentes.reverse().forEach(s=>{
       const item=document.createElement('div');item.className='request-item';
-      item.innerHTML=`<div class="request-top"><span class="list-name">${s.userName}</span><span class="pill pill-blue">${SOL_LABELS[s.tipo]||s.tipo}</span></div><div class="request-body">${s.detalhes||'—'}<br><small>Data solicitada: ${fmtDate(s.data)}</small></div><div class="request-actions"><button class="btn btn-success btn-sm" onclick="decidirSol('${s.id}','aprovado')">Aprovar</button><button class="btn btn-danger btn-sm" onclick="decidirSol('${s.id}','reprovado')">Reprovar</button></div>`;
+      item.innerHTML=`<div class="request-top"><span class="list-name">${s.userName}</span><span class="pill pill-blue">${SOL_LABELS[s.tipo]||s.tipo}</span></div><div class="request-body">${s.detalhes||''}<br><small>Data solicitada: ${fmtDate(s.data)}</small></div><div class="request-actions"><button class="btn btn-success btn-sm" onclick="decidirSol('${s.id}','aprovado')">Aprovar</button><button class="btn btn-danger btn-sm" onclick="decidirSol('${s.id}','reprovado')">Reprovar</button></div>`;
       pCard.appendChild(item);
     });
     const dot=document.getElementById('dot-solicitacoes');if(dot)dot.classList.toggle('show',pendentes.length>0);
@@ -1219,7 +1219,7 @@ function buildTarefasList(){
   tarefas.sort((a,b)=>{const o={urgente:0,normal:1,baixa:2};return o[a.prioridade]-o[b.prioridade]}).forEach(t=>{
     const item=document.createElement('div');item.className='task-item';
     const quem=t.funcionario==='todos'?'Todos':t.funcionario;
-    item.innerHTML=`<div class="task-prio" style="background:${PRIO_COLORS[t.prioridade]}"></div><div class="task-info"><div class="task-title ${t.feita?'task-done':''}">${t.titulo}</div><div class="task-meta">${t.hora||''} ${t.hora&&quem?'·':''} ${quem||''}</div>${t.desc?`<div class="task-who">${t.desc}</div>`:''}</div><span class="pill" style="background:${PRIO_COLORS[t.prioridade]}22;color:${PRIO_COLORS[t.prioridade]};border-color:${PRIO_COLORS[t.prioridade]}44">${PRIO_LABELS[t.prioridade]}</span>${isAdmin?`<button class="btn btn-ghost btn-sm btn-icon" onclick="toggleTarefa('${t.id}')" title="Marcar feita">✓</button><button class="btn btn-ghost btn-sm btn-icon" onclick="removerTarefa('${t.id}')" title="Remover">✕</button>`:''}`;
+    item.innerHTML=`<div class="task-prio" style="background:${PRIO_COLORS[t.prioridade]}"></div><div class="task-info"><div class="task-title ${t.feita?'task-done':''}">${t.titulo}</div><div class="task-meta">${t.hora||''} ${t.hora&&quem?'|':''} ${quem||''}</div>${t.desc?`<div class="task-who">${t.desc}</div>`:''}</div><span class="pill" style="background:${PRIO_COLORS[t.prioridade]}22;color:${PRIO_COLORS[t.prioridade]};border-color:${PRIO_COLORS[t.prioridade]}44">${PRIO_LABELS[t.prioridade]}</span>${isAdmin?`<button class="btn btn-ghost btn-sm btn-icon" onclick="toggleTarefa('${t.id}')" title="Marcar feita">✓</button><button class="btn btn-ghost btn-sm btn-icon" onclick="removerTarefa('${t.id}')" title="Remover">✕</button>`:''}`;
     list.appendChild(item);
   });
 }
@@ -1228,13 +1228,12 @@ window.toggleTarefa = function(id){const t=S.tarefas.find(x=>x.id===id);if(t){t.
 window.removerTarefa = function(id){S.tarefas=S.tarefas.filter(x=>x.id!==id);window.save();buildCalendar()}
 window.changeMonth = function(dir){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++}if(calMonth<0){calMonth=11;calYear--}buildCalendar()}
 
-const DOC_CAT={circular:'Circular',script:'Script fixo',procedimento:'Procedimento',outro:'Outro'};
 function buildDocs(){
   const list=document.getElementById('docsList');list.innerHTML='';
   if(!S.docs.length){list.innerHTML='<div class="empty"><p>Nenhum documento publicado</p></div>';return}
   S.docs.slice().reverse().forEach(d=>{
     const item=document.createElement('div');item.className='doc-item';
-    item.innerHTML=`<div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">${d.nome}</div><div class="doc-meta">${DOC_CAT[d.categoria]||d.categoria} · ${fmtDate(d.criadoEm)}</div>${d.obs?`<div class="doc-meta">${d.obs}</div>`:''}</div><span class="pill pill-blue">Abrir</span>`;
+    item.innerHTML=`<div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">${d.nome}</div><div class="doc-meta">${DOC_CAT[d.categoria]||d.categoria} | ${fmtDate(d.criadoEm)}</div>${d.obs?`<div class="doc-meta">${d.obs}</div>`:''}</div><span class="pill pill-blue">Abrir</span>`;
     if(d.url)item.onclick=()=>window.open(d.url,'_blank');
     if(isAdmin){
       const del=document.createElement('button');del.className='btn btn-ghost btn-sm btn-icon';del.textContent='✕';del.style.flexShrink='0';
@@ -1263,7 +1262,7 @@ function buildEquipe(){
     const loja=STORES.find(s=>s.id===p.loja);
     const folhaStr=p.folga.length?'Folga: '+p.folga.map(d=>DAYS[d]).join(', '):'Sem folga fixa';
     const stBtn=(s)=>`<button class="pill ${p.status===s?'pill-'+(s==='ativo'?'green':s==='ferias'?'yellow':'red'):''}" onclick="setStatus('${p.name}','${s}')" style="cursor:pointer">${s.charAt(0).toUpperCase()+s.slice(1)}</button>`;
-    row.innerHTML=`<div class="list-av av-${ci}">${initials(p.name)}</div><div class="list-info"><div class="list-name">${p.name}</div><div class="list-sub">${(loja||{label:'—'}).label} · ${folhaStr}</div><div class="list-sub" style="color:var(--text3)">${p.email}</div></div><div class="list-right" style="flex-direction:column;align-items:flex-end;gap:4px">${stBtn('ativo')}${stBtn('ferias')}${stBtn('licenca')}<button class="pill pill-red" onclick="removerFuncionario('${p.name}')" style="cursor:pointer;margin-top:2px">Remover</button></div>`;
+    row.innerHTML=`<div class="list-av av-${ci}">${initials(p.name)}</div><div class="list-info"><div class="list-name">${p.name}</div><div class="list-sub">${(loja||{label:''}).label} | ${folhaStr}</div><div class="list-sub" style="color:var(--text3)">${p.email}</div></div><div class="list-right" style="flex-direction:column;align-items:flex-end;gap:4px">${stBtn('ativo')}${stBtn('ferias')}${stBtn('licenca')}<button class="pill pill-red" onclick="removerFuncionario('${p.name}')" style="cursor:pointer;margin-top:2px">Remover</button></div>`;
     list.appendChild(row);
   });
 }
@@ -1291,7 +1290,7 @@ window.cadastrarFuncionario = async function(){
   const email=document.getElementById('fnEmail').value.trim().toLowerCase();
   const pass=document.getElementById('fnSenha').value;
   const loja=document.getElementById('fnLoja').value;
-  if(!nome||!email||pass.length<6){toast('Preencha tudo (senha mín. 6 char)');return}
+  if(!nome||!email||pass.length<6){toast('Preencha tudo com senha maior que 6 caracteres');return}
   if(S.people.find(p=>p.email.toLowerCase()===email)){toast('E-mail já cadastrado');return}
   
   const folga=[...document.querySelectorAll('#fnFolgaGrid .day-chk.sel')].map(b=>parseInt(b.dataset.day));
@@ -1328,7 +1327,7 @@ window.showNotifications = function(){
 function showTaskBanner(titulo,hora){
   const banner=document.getElementById('taskNotifBanner');
   const sub=document.getElementById('taskNotifSub');
-  sub.textContent=(hora?hora+' · ':'')+titulo;
+  sub.textContent=(hora?hora+' | ':'')+titulo;
   banner.classList.add('show');
   clearTimeout(banner._t);banner._t=setTimeout(()=>banner.classList.remove('show'),6000);
 }
