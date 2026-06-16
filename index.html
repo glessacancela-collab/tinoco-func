@@ -169,13 +169,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .cal-month{font-size:16px;font-weight:700;flex:1}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:12px}
 .cal-day-name{font-size:10px;font-weight:700;text-align:center;color:var(--text3);padding:3px 0;text-transform:uppercase}
-.cal-day{padding:4px 2px 3px;border-radius:var(--radius-xs);text-align:center;cursor:pointer;font-size:13px;font-weight:500;min-height:38px;position:relative;transition:background .12s;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:1px}
+.cal-day{padding:6px 3px;border-radius:var(--radius-xs);text-align:center;cursor:pointer;font-size:13px;font-weight:500;min-height:34px;position:relative;transition:background .12s}
 .cal-day:hover{background:var(--card2)}
-.cal-day.today{background:var(--accent);color:#fff;border-radius:50%;width:30px;height:30px;min-height:30px;justify-content:center;margin:auto}
-.cal-day.has-task::after{display:none} /* desativa o ponto único antigo */
-.cal-dots{display:flex;justify-content:center;gap:3px;margin-top:2px;min-height:6px}
-.cal-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
-.cal-day.today .cal-dot{opacity:.85}
+.cal-day.today{background:var(--accent);color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;margin:auto}
+.cal-day.has-task::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--accent)}
+.cal-day.today.has-task::after{background:#fff}
 .cal-day.other-month{color:var(--text3)}
 .task-item{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border2)}
 .task-item:last-child{border-bottom:none}
@@ -259,28 +257,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 
 <div id="auth-screen">
   <div class="auth-logo">
-    <!-- Logo fiel ao original: TIN + lente + CO em cima, barra TECH CELL em baixo -->
-    <svg width="260" height="100" viewBox="0 0 520 200" xmlns="http://www.w3.org/2000/svg">
-      <!-- TIN -->
-      <text x="8" y="128" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="130" fill="#7dc51e" letter-spacing="2">TIN</text>
-      <!-- Lente: círculo exterior cinza claro -->
-      <circle cx="298" cy="82" r="72" fill="none" stroke="#8a8e94" stroke-width="5"/>
-      <!-- Lente: anel preto preenchido entre os dois círculos -->
-      <circle cx="298" cy="82" r="67" fill="#111"/>
-      <!-- Lente: círculo interior cinza médio (aro interno) -->
-      <circle cx="298" cy="82" r="52" fill="none" stroke="#8a8e94" stroke-width="5"/>
-      <!-- Lente: fundo preto interno -->
-      <circle cx="298" cy="82" r="49" fill="#0a0a0a"/>
-      <!-- Lente: sensor retangular arredondado cinza -->
-      <rect x="271" y="61" width="54" height="42" rx="8" ry="8" fill="none" stroke="#8a8e94" stroke-width="5"/>
-      <!-- CO -->
-      <text x="352" y="128" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="130" fill="#7dc51e" letter-spacing="2">CO</text>
-      <!-- Barra inferior cinza -->
-      <rect x="8" y="142" width="504" height="50" rx="8" fill="#7a7d85"/>
-      <!-- TECH (esquerda da barra) -->
-      <text x="100" y="178" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="34" fill="#ffffff" text-anchor="middle" letter-spacing="5">TECH</text>
-      <!-- CELL (direita da barra) -->
-      <text x="420" y="178" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="34" fill="#ffffff" text-anchor="middle" letter-spacing="5">CELL</text>
+    <svg width="220" height="80" viewBox="0 0 440 160" xmlns="http://www.w3.org/2000/svg">
+      <text x="0" y="110" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="108" fill="#7dc51e" letter-spacing="-2">TIN</text>
+      <circle cx="268" cy="68" r="58" fill="none" stroke="#7a7d85" stroke-width="5"/>
+      <circle cx="268" cy="68" r="40" fill="#27292f"/>
+      <rect x="248" y="54" width="40" height="28" rx="5" fill="none" stroke="#7a7d85" stroke-width="4"/>
+      <text x="304" y="110" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="108" fill="#7dc51e" letter-spacing="-2">CO</text>
+      <rect x="30" y="116" width="380" height="38" rx="6" fill="#7a7d85"/>
+      <text x="220" y="143" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="26" fill="#ffffff" text-anchor="middle" letter-spacing="8">TECH    CELL</text>
     </svg>
   </div>
   <div class="auth-title">CNPJ 59.571.477/0001-70</div>
@@ -308,18 +292,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 <div id="app">
   <div class="nav-bar">
     <div class="nav-logo">
-      <!-- Mini logo fiel: TIN + lente + CO + barra TECH CELL -->
-      <svg width="110" height="36" viewBox="0 0 520 200" xmlns="http://www.w3.org/2000/svg">
-        <text x="8" y="128" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="130" fill="#7dc51e" letter-spacing="2">TIN</text>
-        <circle cx="298" cy="82" r="72" fill="none" stroke="#8a8e94" stroke-width="5"/>
-        <circle cx="298" cy="82" r="67" fill="#111"/>
-        <circle cx="298" cy="82" r="52" fill="none" stroke="#8a8e94" stroke-width="5"/>
-        <circle cx="298" cy="82" r="49" fill="#0a0a0a"/>
-        <rect x="271" y="61" width="54" height="42" rx="8" ry="8" fill="none" stroke="#8a8e94" stroke-width="5"/>
-        <text x="352" y="128" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="130" fill="#7dc51e" letter-spacing="2">CO</text>
-        <rect x="8" y="142" width="504" height="50" rx="8" fill="#7a7d85"/>
-        <text x="100" y="178" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="34" fill="#ffffff" text-anchor="middle" letter-spacing="5">TECH</text>
-        <text x="420" y="178" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="34" fill="#ffffff" text-anchor="middle" letter-spacing="5">CELL</text>
+      <svg width="80" height="26" viewBox="0 0 220 70" xmlns="http://www.w3.org/2000/svg">
+        <text x="0" y="48" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="48" fill="#7dc51e" letter-spacing="-1">TIN</text>
+        <circle cx="119" cy="28" r="23" fill="none" stroke="#7a7d85" stroke-width="2.5"/>
+        <circle cx="119" cy="28" r="16" fill="#27292f"/>
+        <rect x="111" y="21" width="16" height="12" rx="2.5" fill="none" stroke="#7a7d85" stroke-width="2"/>
+        <text x="136" y="48" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="48" fill="#7dc51e" letter-spacing="-1">CO</text>
+        <rect x="14" y="50" width="192" height="17" rx="3" fill="#7a7d85"/>
+        <text x="110" y="63" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="11" fill="#fff" text-anchor="middle" letter-spacing="4">TECH  CELL</text>
       </svg>
     </div>
     <div style="flex:1">
@@ -344,11 +324,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
     <div class="screen active" id="screen-escala">
       <div style="padding:12px 0 4px">
         <div class="day-strip" id="dayStrip"></div>
-        <!-- Label visível apenas para funcionários -->
-        <div id="escalaViewLabel" style="display:none;align-items:center;gap:6px;background:var(--accent-bg);border:1px solid var(--accent);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:8px;font-size:12px;font-weight:500;color:var(--accent)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          Modo visualização — navegue pelos dias para ver sua escala da semana
-        </div>
         <div class="status-bar neu" id="statusBar">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="statusIcon"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           <span id="statusTxt">Distribua a equipe.</span>
@@ -382,6 +357,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
         </div>
         <div class="section-title" style="margin-top:4px">Meu histórico de hoje</div>
         <div class="card" id="pontoHistorico"></div>
+        <div class="card" style="margin-top:0" id="banchoHorasStaff"></div>
       </div>
 
       <div id="adminPontoSection" style="display:none">
@@ -737,8 +713,20 @@ function sanitizeState(data) {
             {name:'Willy',email:'willy@tinoco.com',pass:'willy123',loja:'maravista',folga:[],status:'ativo',color:7}
         ];
     }
+    // CORREÇÃO: Firebase serializa arrays vazios como null — garante array real em folga
     res.people.forEach(p => {
-        p.folga = ensureArray(p.folga);
+        if(!p.folga || !Array.isArray(p.folga)) {
+            // Firebase pode retornar objeto {0:1, 1:3} em vez de array [1,3]
+            if(p.folga && typeof p.folga === 'object') {
+                p.folga = Object.values(p.folga).map(v => parseInt(v));
+            } else {
+                p.folga = [];
+            }
+        } else {
+            p.folga = p.folga.map(v => parseInt(v));
+        }
+        if(!p.status) p.status = 'ativo';
+        if(!p.loja) p.loja = 'icarai';
     });
     if (res.ponto) {
         Object.keys(res.ponto).forEach(k => {
@@ -754,7 +742,16 @@ onValue(ref(database, 'tinoco_state'), (snapshot) => {
     if (data) {
         S = sanitizeState(data);
         if (currentUser) {
+            // Atualiza o currentUser com dados mais recentes do Firebase (ex: folga editada)
+            if(!isAdmin) {
+                const fresh = S.people.find(p=>p.email===currentUser.email);
+                if(fresh) currentUser = fresh;
+            }
             initBenchAllDays();
+            // Repopula selects sempre que dados chegam (corrige selects vazios)
+            populateTfFuncionario();
+            populateBuscaFuncionario();
+            window.populateRelFuncionario();
             if(document.getElementById('screen-escala').classList.contains('active')) buildSchedule();
             if(document.getElementById('screen-ponto').classList.contains('active')) buildPonto();
             if(document.getElementById('screen-solicitacoes').classList.contains('active')) buildSolicitacoes();
@@ -916,7 +913,11 @@ function getPerson(name){return S.people.find(p=>p.name===name)}
 function isUnavail(name){
   const p=getPerson(name);if(!p)return true;
   if(p.status!=='ativo')return true;
-  if(p.folga.includes(S.schedule.currentDay))return true;
+  // Garante comparação segura mesmo se folga vier como objeto do Firebase
+  const folgaArr = Array.isArray(p.folga)
+      ? p.folga.map(v=>parseInt(v))
+      : (p.folga && typeof p.folga==='object' ? Object.values(p.folga).map(v=>parseInt(v)) : []);
+  if(folgaArr.includes(S.schedule.currentDay))return true;
   return false;
 }
 function getTag(name){
@@ -970,14 +971,10 @@ function buildDayStrip(){
     btn.className='day-pill'+(i===S.schedule.currentDay?' active':'');
     btn.textContent=d;
     btn.onclick=()=>{
-      S.schedule.currentDay=i;
-      if(isAdmin) window.save(); // funcionário só navega sem salvar
-      buildDayStrip();buildSchedule();
+      S.schedule.currentDay=i;window.save();buildDayStrip();buildSchedule();
     };
     strip.appendChild(btn);
   });
-  const lbl=document.getElementById('escalaViewLabel');
-  if(lbl) lbl.style.display=isAdmin?'none':'flex';
 }
 
 function makeChip(name,source,small){
@@ -1117,6 +1114,7 @@ function buildPonto(){
     grid.appendChild(btn);
   });
   buildPontoHistorico();
+  buildBancoHorasStaff();
 }
 
 window.confirmarPonto = function(){
@@ -1289,62 +1287,6 @@ window.populateRelFuncionario = function(){
   const sel=document.getElementById('relFuncionario');if(!sel)return;
   sel.innerHTML=S.people.map(p=>`<option value="${p.name}">${p.name}</option>`).join('');
 }
-
-function populateBuscaFuncionario(){
-  const sel=document.getElementById('buscaPontoFunc');if(!sel)return;
-  sel.innerHTML=S.people.map(p=>`<option value="${p.name}">${p.name}</option>`).join('');
-  // Default: hoje
-  const n=new Date();
-  const inp=document.getElementById('buscaPontoData');
-  if(inp) inp.value=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
-}
-
-window.buscarPontoDia = function(){
-  const nome=document.getElementById('buscaPontoFunc').value;
-  const dataVal=document.getElementById('buscaPontoData').value;
-  if(!nome||!dataVal){toast('Selecione funcionário e data');return}
-  const [ano,mes,dia]=dataVal.split('-').map(Number);
-  // Tenta os dois formatos de chave que podem existir no banco
-  const key1=`${ano}-${mes}-${dia}`;
-  const key2=`${ano}-${String(mes).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
-  const reg=(S.ponto[key1]||S.ponto[key2]||{})[nome]||{};
-  const dt=new Date(ano,mes-1,dia);
-  const diaSemana=DAYS[dt.getDay()];
-  const worked=calcWorkedMinutes(reg);
-  const saldo=calcSaldoDia(reg);
-  const status=getCurrentStatus(reg);
-  const statusLabels={trabalhando:'Trabalhando',almoco:'No almoço',fora:'Saiu',['sem-registro']:'Sem registro'};
-  const div=document.getElementById('resultadoPontoDia');
-  if(!reg||!reg.entrada){
-    div.innerHTML=`<div style="background:var(--card2);border-radius:var(--radius-sm);padding:12px;color:var(--text2)">
-      <b>${nome}</b> — ${diaSemana}, ${String(dia).padStart(2,'0')}/${String(mes).padStart(2,'0')}/${ano}<br>
-      <span style="color:var(--text3)">Sem registro de ponto neste dia.</span>
-    </div>`;
-    return;
-  }
-  const saldoColor=saldo===null?'var(--text3)':saldo>=0?'var(--success)':'var(--danger)';
-  const saldoStr=saldo!==null?((saldo>=0?'+':'')+minutesToHHMM(saldo)+'h'):'—';
-  div.innerHTML=`<div style="background:var(--card2);border-radius:var(--radius-sm);padding:14px">
-    <div style="font-weight:700;font-size:14px;margin-bottom:10px">${nome} — ${diaSemana}, ${String(dia).padStart(2,'0')}/${String(mes).padStart(2,'0')}/${ano}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      ${PONTO_TYPES.map(t=>`<div style="background:var(--card);border-radius:var(--radius-xs);padding:8px;display:flex;align-items:center;gap:8px">
-        <span style="font-size:18px">${t.icon}</span>
-        <div><div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase">${t.label}</div>
-        <div style="font-size:14px;font-weight:700;color:${reg[t.id]?'var(--text)':'var(--text3)'}">${reg[t.id]||'—'}</div></div>
-      </div>`).join('')}
-    </div>
-    <div style="display:flex;gap:10px;margin-top:10px">
-      <div style="flex:1;background:var(--card);border-radius:var(--radius-xs);padding:10px;text-align:center">
-        <div style="font-size:11px;color:var(--text3)">Total trabalhado</div>
-        <div style="font-size:16px;font-weight:700">${worked!==null?minutesToHHMM(worked)+'h':'—'}</div>
-      </div>
-      <div style="flex:1;background:var(--card);border-radius:var(--radius-xs);padding:10px;text-align:center">
-        <div style="font-size:11px;color:var(--text3)">Saldo do dia</div>
-        <div style="font-size:16px;font-weight:700;color:${saldoColor}">${saldoStr}</div>
-      </div>
-    </div>
-  </div>`;
-}
 window.setDefaultRelMes = function(){
   const inp=document.getElementById('relMes');if(!inp)return;
   const n=new Date();inp.value=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');
@@ -1362,105 +1304,66 @@ window.gerarRelatorioPonto = function(){
   const [ano,mes]=mesVal.split('-').map(Number);
   const p=S.people.find(x=>x.name===nomeFun);
   if(!p){toast('Funcionário não encontrado');return}
+
   const diasNoMes=new Date(ano,mes,0).getDate();
   const registros=[];
   for(let d=1;d<=diasNoMes;d++){
-    const key=ano+'-'+String(mes).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-    const keyAlt=ano+'-'+mes+'-'+d;
-    const reg=(S.ponto[key]||S.ponto[keyAlt]||{})[nomeFun]||null;
+    const key=`${ano}-${mes}-${d}`;
+    const reg=(S.ponto[key]||{})[nomeFun]||null;
     const dt=new Date(ano,mes-1,d);
-    registros.push({dia:d,diaSemana:DAYS[dt.getDay()],reg,worked:reg?calcWorkedMinutes(reg):null,saldo:reg?calcSaldoDia(reg):null});
+    const diaSemana=DAYS[dt.getDay()];
+    const worked=reg?calcWorkedMinutes(reg):null;
+    const saldo=reg?calcSaldoDia(reg):null;
+    registros.push({dia:d,diaSemana,reg,worked,saldo});
   }
+
   const totalWorked=registros.reduce((a,r)=>a+(r.worked||0),0);
   const totalSaldo=registros.reduce((a,r)=>a+(r.saldo||0),0);
   const diasTrabalhados=registros.filter(r=>r.worked!==null&&r.worked>0).length;
   const mesNome=MONTHS[mes-1];
-  const loja=STORES.find(s=>s.id===p.loja)||{label:'—'};
+  const loja=STORES.find(s=>s.id===p.loja)||{label:''};
+
   const linhas=registros.map(r=>{
     const isWeekend=r.diaSemana==='Dom'||r.diaSemana==='Sáb';
-    const bg=isWeekend?'#f5f5f5':'#fff';
+    const bg=isWeekend?'#f8f8f8':'#fff';
+    const entrada=r.reg?.entrada||'';
+    const sAlmoco=r.reg?.saida_almoco||'';
+    const rAlmoco=r.reg?.retorno_almoco||'';
+    const saida=r.reg?.saida||'';
+    const workedStr=r.worked!==null?minutesToHHMM(r.worked)+'h':'';
+    const saldoStr=r.saldo!==null?((r.saldo>=0?'+':'')+minutesToHHMM(r.saldo)+'h'):'';
     const saldoColor=r.saldo===null?'#999':r.saldo>0?'#16a34a':r.saldo<0?'#dc2626':'#888';
     return `<tr style="background:${bg}">
-      <td>${String(r.dia).padStart(2,'0')}</td><td>${r.diaSemana}</td>
-      <td>${r.reg?.entrada||''}</td><td>${r.reg?.saida_almoco||''}</td>
-      <td>${r.reg?.retorno_almoco||''}</td><td>${r.reg?.saida||''}</td>
-      <td>${r.worked!==null?minutesToHHMM(r.worked)+'h':''}</td>
-      <td style="color:${saldoColor};font-weight:600">${r.saldo!==null?((r.saldo>=0?'+':'')+minutesToHHMM(r.saldo)+'h'):''}</td>
+      <td>${String(r.dia).padStart(2,'0')}</td>
+      <td>${r.diaSemana}</td>
+      <td>${entrada}</td>
+      <td>${sAlmoco}</td>
+      <td>${rAlmoco}</td>
+      <td>${saida}</td>
+      <td>${workedStr}</td>
+      <td style="color:${saldoColor};font-weight:600">${saldoStr}</td>
     </tr>`;
   }).join('');
+
   const saldoTotalColor=totalSaldo>0?'#16a34a':totalSaldo<0?'#dc2626':'#444';
+  const saldoTotalStr=(totalSaldo>=0?'+':'')+minutesToHHMM(totalSaldo)+'h';
+
   const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
-<title>Relatório de Ponto — ${nomeFun} — ${mesNome}/${ano}</title>
+<title>Relatório de Ponto | ${nomeFun}</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#1a1a1a;padding:28px 32px}
-.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;padding-bottom:14px;border-bottom:3px solid #7dc51e}
-.logo-name{font-size:22px;font-weight:900;color:#27292f;letter-spacing:-0.5px}
-.logo-name span{color:#7dc51e}
-.logo-sub{font-size:10px;color:#666;margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
-.logo-cnpj{font-size:9.5px;color:#888;margin-top:3px}
-.report-title{text-align:right}
-.report-title h1{font-size:16px;font-weight:700;color:#27292f}
-.report-title p{font-size:10px;color:#777;margin-top:3px}
-.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;background:#f5f5f5;border-radius:6px;padding:12px}
-.info-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#888}
-.info-value{font-size:13px;font-weight:600;color:#1a1a1a;margin-top:2px}
-table{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:10px}
-thead th{background:#27292f;color:#fff;padding:7px 6px;text-align:center;font-weight:700;letter-spacing:.03em}
-tbody td{padding:5px 6px;text-align:center;border-bottom:0.5px solid #e5e5e5}
-tbody tr:hover{background:#f0fde4!important}
-.totals{background:#f5f5f5;border-radius:6px;padding:12px;margin-bottom:20px;display:flex;gap:12px}
-.total-item{flex:1;text-align:center}
-.total-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888}
-.total-value{font-size:17px;font-weight:700;margin-top:4px}
-.assinaturas{display:grid;grid-template-columns:1fr 1fr;gap:50px;margin-top:32px}
-.assinatura-box{border-top:1px solid #999;padding-top:8px;text-align:center}
-.assinatura-label{font-size:9px;color:#888}
-.assinatura-name{font-size:11px;font-weight:600;margin-top:3px}
-.footer{margin-top:18px;font-size:8.5px;color:#bbb;text-align:center;border-top:0.5px solid #e5e5e5;padding-top:10px}
-.print-btn{text-align:center;margin-top:20px}
-@media print{.print-btn{display:none}}
+body{font-family:Arial,sans-serif;font-size:11px;padding:30px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px;text-align:center}th{background:#333;color:#fff}
 </style></head><body>
-<div class="header">
-  <div>
-    <div class="logo-name">TIN<span>O</span>CO <span>TECH CELL</span></div>
-    <div class="logo-sub">Manutenção e Comércio de Eletrônicos</div>
-    <div class="logo-cnpj">CNPJ: 59.571.477/0001-70</div>
-  </div>
-  <div class="report-title">
-    <h1>Relatório de Ponto</h1>
-    <p>Mês de referência: ${mesNome} de ${ano}</p>
-    <p>Emitido em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</p>
-  </div>
-</div>
-<div class="info-grid">
-  <div><div class="info-label">Funcionário</div><div class="info-value">${nomeFun}</div></div>
-  <div><div class="info-label">Loja</div><div class="info-value">${loja.label}</div></div>
-  <div><div class="info-label">Jornada diária</div><div class="info-value">${JORNADA_HORAS}h</div></div>
-</div>
+<h1>Relatório de Ponto: ${nomeFun} | ${mesNome}/${ano}</h1>
 <table>
   <thead><tr><th>Dia</th><th>Semana</th><th>Entrada</th><th>Saída almoço</th><th>Retorno</th><th>Saída</th><th>Trabalhado</th><th>Saldo</th></tr></thead>
   <tbody>${linhas}</tbody>
 </table>
-<div class="totals">
-  <div class="total-item"><div class="total-label">Dias trabalhados</div><div class="total-value">${diasTrabalhados}</div></div>
-  <div class="total-item"><div class="total-label">Total trabalhado</div><div class="total-value">${minutesToHHMM(totalWorked)}h</div></div>
-  <div class="total-item"><div class="total-label">Saldo do banco</div><div class="total-value" style="color:${saldoTotalColor}">${(totalSaldo>=0?'+':'')+minutesToHHMM(totalSaldo)}h</div></div>
-  <div class="total-item"><div class="total-label">Previsto no mês</div><div class="total-value">${minutesToHHMM(diasTrabalhados*JORNADA_HORAS*60)}h</div></div>
-</div>
-<div class="assinaturas">
-  <div class="assinatura-box"><div class="assinatura-label">Assinatura do funcionário</div><div class="assinatura-name">${nomeFun}</div></div>
-  <div class="assinatura-box"><div class="assinatura-label">Responsável / Administrador</div><div class="assinatura-name">Tinoco Tech Cell</div></div>
-</div>
-<div class="footer">Tinoco Tech Cell — CNPJ 59.571.477/0001-70 — Documento gerado automaticamente pelo sistema interno</div>
-<div class="print-btn">
-  <button onclick="window.print()" style="background:#7dc51e;color:#1a1a1a;border:none;padding:10px 28px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;margin-right:8px">🖨 Imprimir / Salvar PDF</button>
-  <button onclick="window.close()" style="background:#eee;color:#333;border:none;padding:10px 20px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer">Fechar</button>
-</div>
+<div style="margin-top:20px"><b>Saldo Total do Mês:</b> <span style="color:${saldoTotalColor}">${saldoTotalStr}</span></div>
+<div style="margin-top:30px"><button onclick="window.print()">Imprimir PDF</button></div>
 </body></html>`;
-  const win=window.open('','_blank','width=960,height=720');
-  if(win){win.document.write(html);win.document.close();toast('PDF gerado! Use "Salvar como PDF" na impressão');}
-  else toast('Permita pop-ups para gerar o relatório.');
+
+  const win=window.open('','_blank','width=900,height=700');
+  if(win){win.document.write(html);win.document.close();}else{toast('Permita pop-ups.');}
 }
 
 function buildSolicitacoes(){
@@ -1518,16 +1421,33 @@ window.enviarSolicitacao = function(){
   if(!data){toast('Informe a data');return}
   const sol={id:Date.now().toString(),userName:currentUser.name,tipo,data,detalhes,status:'pendente',criadoEm:new Date().toISOString()};
   S.solicitacoes.push(sol);
-  S.notifs.push({id:Date.now().toString(),msg:`Nova solicitação de ${currentUser.name}: ${tipo}`,lida:false,ts:new Date().toISOString()});
+  // Notif tagada como solicitacao (visível só para admin)
+  S.notifs.push({
+      id:Date.now().toString(),
+      msg:`Nova solicitação de ${currentUser.name}: ${tipo}`,
+      lida:false,
+      ts:new Date().toISOString(),
+      tipo:'solicitacao',
+      para:'admin'
+  });
   window.save();closeSheet('sheetSolicitacao');buildSolicitacoes();toast('Solicitação enviada!');checkNotifs();
 }
 
 window.decidirSol = function(id,decisao){
   const sol=S.solicitacoes.find(s=>s.id===id);if(!sol)return;
   const justificativaTexto=prompt('Justificativa para a decisão tomada (opcional):');
-  if(justificativaTexto===null) return; 
+  if(justificativaTexto===null) return;
   sol.status=decisao;
   sol.justificativa=justificativaTexto||'';
+  // Notif de resposta tagada com para = nome do funcionário (só ele vê)
+  S.notifs.push({
+      id:Date.now().toString(),
+      msg:`Sua solicitação "${sol.tipo}" foi ${decisao}${sol.justificativa?' — '+sol.justificativa:''}`,
+      lida:false,
+      ts:new Date().toISOString(),
+      tipo:'resposta_sol',
+      para:sol.userName
+  });
   window.save();buildSolicitacoes();toast('Solicitação '+decisao);
 }
 
@@ -1580,30 +1500,24 @@ window.deletarRecado = function(id){
 function populateTfFuncionario(){
   const sel=document.getElementById('tfFuncionario');sel.innerHTML='<option value="todos">Toda a equipa</option>'+S.people.map(p=>`<option value="${p.name}">${p.name}</option>`).join('');
 }
-function normDateStr(d){
-  if(!d)return'';
-  const p=d.split('-');
-  if(p.length!==3)return d;
-  return p[0]+'-'+String(parseInt(p[1])).padStart(2,'0')+'-'+String(parseInt(p[2])).padStart(2,'0');
-}
-
 window.salvarTarefa = function(){
   const titulo=document.getElementById('tfTitulo').value.trim();
   if(!titulo){toast('Informe o título');return}
   const funcionario=document.getElementById('tfFuncionario').value;
-  const dataRaw=document.getElementById('tfData').value;
-  const tarefa={
-    id:Date.now().toString(),titulo,
-    desc:document.getElementById('tfDesc').value.trim(),
-    data:normDateStr(dataRaw),
-    hora:document.getElementById('tfHora').value,
-    funcionario,prioridade:document.getElementById('tfPrioridade').value,
-    feita:false,criadoEm:new Date().toISOString()
-  };
+  const tarefa={id:Date.now().toString(),titulo,desc:document.getElementById('tfDesc').value.trim(),data:document.getElementById('tfData').value,hora:document.getElementById('tfHora').value,funcionario,prioridade:document.getElementById('tfPrioridade').value,feita:false,criadoEm:new Date().toISOString()};
   S.tarefas.push(tarefa);
-  const quem=funcionario==='todos'?'todos os funcionários':funcionario;
-  S.notifs.push({id:Date.now().toString(),msg:`Nova tarefa para ${quem}: ${titulo}`,lida:false,ts:new Date().toISOString(),tipo:'tarefa',tarefaId:tarefa.id});
-  window.save();closeSheet('sheetTarefa');buildCalendar();buildTarefasHistorico();toast('Tarefa salva!');
+  const quem=funcionario==='todos'?'toda a equipe':funcionario;
+  // Notif corretamente tagada com tipo e para (para filtragem por usuário)
+  S.notifs.push({
+      id:Date.now().toString(),
+      msg:`Nova tarefa: ${titulo}`,
+      lida:false,
+      ts:new Date().toISOString(),
+      tipo:'tarefa',
+      tarefaId:tarefa.id,
+      para:funcionario // 'todos' ou nome específico
+  });
+  window.save();closeSheet('sheetTarefa');buildCalendar();toast('Tarefa salva!');
   checkNotifs();
   if(!isAdmin&&(funcionario==='todos'||funcionario===currentUser.name)){
     showTaskBanner(titulo,tarefa.hora);
@@ -1623,38 +1537,13 @@ function buildCalendar(){
     const el=document.createElement('div');
     const isToday=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d;
     const dateStr=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-
-    // Tarefas do dia visíveis para este usuário
-    const dayTasks=S.tarefas.filter(t=>
-      !t.feita &&
-      normDateStr(t.data)===dateStr &&
-      (isAdmin||t.funcionario==='todos'||t.funcionario===currentUser.name)
-    );
-
-    el.className='cal-day'+(isToday?' today':'')+(dayTasks.length?' has-task':'');
-
-    // Número do dia
-    const numSpan=document.createElement('span');
-    numSpan.textContent=d;
-    el.appendChild(numSpan);
-
-    // Pontinhos coloridos por prioridade (máx. 3, um de cada)
-    if(dayTasks.length){
-      const dotsDiv=document.createElement('div');
-      dotsDiv.className='cal-dots';
-      const priosPresentes=[...new Set(dayTasks.map(t=>t.prioridade))];
-      // Ordem: urgente → normal → baixa
-      ['urgente','normal','baixa'].forEach(prio=>{
-        if(priosPresentes.includes(prio)){
-          const dot=document.createElement('div');
-          dot.className='cal-dot';
-          dot.style.background=PRIO_COLORS[prio];
-          dotsDiv.appendChild(dot);
-        }
-      });
-      el.appendChild(dotsDiv);
-    }
-
+    const hasTasks=S.tarefas.some(t=>{
+        if(t.feita) return false;
+        if(t.data!==dateStr && t.data!==`${calYear}-${calMonth+1}-${d}`) return false;
+        return isAdmin||t.funcionario==='todos'||t.funcionario===currentUser.name;
+    });
+    el.className='cal-day'+(isToday?' today':'')+(hasTasks?' has-task':'');
+    el.textContent=d;
     el.onclick=()=>{calSelectedDay=new Date(calYear,calMonth,d);buildTarefasList()};
     grid.appendChild(el);
   }
@@ -1664,11 +1553,12 @@ function buildCalendar(){
 function buildTarefasList(){
   const d=calSelectedDay;
   const dateStr=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const dateStrAlt=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
   const label=document.getElementById('calDayLabel');
   const today=new Date();const isToday=today.toDateString()===d.toDateString();
   label.textContent=isToday?'Tarefas pendentes hoje':`Pendentes dia ${d.getDate()}`;
   const list=document.getElementById('tarefasList');list.innerHTML='';
-  const tarefas=S.tarefas.filter(t=>!t.feita && normDateStr(t.data)===dateStr &&(isAdmin||t.funcionario==='todos'||t.funcionario===currentUser.name));
+  const tarefas=S.tarefas.filter(t=>!t.feita && (t.data===dateStr||t.data===dateStrAlt) &&(isAdmin||t.funcionario==='todos'||t.funcionario===currentUser.name));
   if(!tarefas.length){list.innerHTML='<div class="empty"><p>Sem tarefas neste dia</p></div>';return}
   tarefas.sort((a,b)=>{const o={urgente:0,normal:1,baixa:2};return o[a.prioridade]-o[b.prioridade]}).forEach(t=>{
     const item=document.createElement('div');item.className='task-item';
@@ -1685,14 +1575,12 @@ window.buildTarefasHistorico = function(){
   hList.innerHTML='';
   const mesFiltro=document.getElementById('filtroMesTf').value;
   if(!mesFiltro) return;
-  const [ano,mes]=mesFiltro.split('-');
-  const prefixo=ano+'-'+String(parseInt(mes)).padStart(2,'0');
-  const hist=S.tarefas.filter(t=>t.feita && normDateStr(t.data).startsWith(prefixo) && (isAdmin||t.funcionario==='todos'||t.funcionario===currentUser.name));
+  const hist=S.tarefas.filter(t=>t.feita && t.data.startsWith(mesFiltro) && (isAdmin||t.funcionario==='todos'||t.funcionario===currentUser.name));
   if(!hist.length){hList.innerHTML='<div class="empty"><p>Nenhuma tarefa finalizada neste mês</p></div>';return}
-  hist.slice().reverse().forEach(t=>{
+  hist.forEach(t=>{
     const item=document.createElement('div');item.className='task-item';
     const quem=t.funcionario==='todos'?'Todos':t.funcionario;
-    item.innerHTML=`<div class="task-prio" style="background:${PRIO_COLORS[t.prioridade]}"></div><div class="task-info"><div class="task-title task-done">${t.titulo}</div><div class="task-meta">${fmtDate(t.data)} ${t.hora||''} | ${quem||''}</div></div><button class="btn btn-ghost btn-sm btn-icon" onclick="toggleTarefa('${t.id}')" title="Reabrir">↺</button>`;
+    item.innerHTML=`<div class="task-prio" style="background:${PRIO_COLORS[t.prioridade]}"></div><div class="task-info"><div class="task-title task-done">${t.titulo}</div><div class="task-meta">${fmtDate(t.data)} ${t.hora||''} | ${quem||''}</div></div><button class="btn btn-ghost btn-sm btn-icon" onclick="toggleTarefa('${t.id}')" title="Desfazer">↺</button>`;
     hList.appendChild(item);
   });
 }
@@ -1832,8 +1720,12 @@ window.editarFuncionario = function(name){
   document.getElementById('fnSenha').value=p.pass;
   document.getElementById('fnLoja').value=p.loja;
   document.getElementById('fnNasc').value=p.nascimento||'';
+  // Regera o grid de folga para garantir que está populado antes de marcar
+  populateFnFolga();
+  // Garante que folga é array antes de usar includes
+  const folgaArr = Array.isArray(p.folga) ? p.folga.map(v=>parseInt(v)) : [];
   document.querySelectorAll('#fnFolgaGrid .day-chk').forEach(b=>{
-      b.classList.toggle('sel', p.folga.includes(parseInt(b.dataset.day)));
+      b.classList.toggle('sel', folgaArr.includes(parseInt(b.dataset.day)));
   });
   openSheet('sheetFuncionario');
 }
@@ -1868,17 +1760,42 @@ window.salvarFuncionario = async function(){
   closeSheet('sheetFuncionario');buildEquipe();buildSchedule();populateTfFuncionario();buildNiver();
 }
 
+// Retorna notificações relevantes para o usuário atual
+function notifsDoUsuario() {
+    if(isAdmin) {
+        // Admin vê: novas solicitações de funcionários e notificações gerais
+        return S.notifs.filter(n =>
+            !n.tipo || n.tipo === 'solicitacao' ||
+            (n.tipo === 'tarefa' && (n.para === 'todos' || n.para === 'admin'))
+        );
+    } else {
+        // Funcionário vê: tarefas para ele ou para todos, e respostas às suas solicitações
+        return S.notifs.filter(n => {
+            if(n.tipo === 'tarefa') {
+                const t = S.tarefas.find(x => x.id === n.tarefaId);
+                return t && (t.funcionario === 'todos' || t.funcionario === currentUser.name);
+            }
+            if(n.tipo === 'resposta_sol') return n.para === currentUser.name;
+            // Sem tipo específico: não exibe para funcionários (são gerenciais)
+            return false;
+        });
+    }
+}
+
 function checkNotifs(){
-  const unread=S.notifs.filter(n=>!n.lida).length;
+  const unread = notifsDoUsuario().filter(n=>!n.lida).length;
   document.getElementById('notifDot').style.display=unread>0?'block':'none';
 }
 
 window.showNotifications = function(){
   const list=document.getElementById('notifList');list.innerHTML='';
-  if(!S.notifs.length){list.innerHTML='<div class="empty"><p>Sem notificações</p></div>';}
-  else{
-    S.notifs.slice().reverse().forEach(n=>{
-      n.lida=true;const item=document.createElement('div');item.className='list-row';
+  const minhas = notifsDoUsuario();
+  if(!minhas.length){
+      list.innerHTML='<div class="empty"><p>Sem notificações</p></div>';
+  } else {
+    minhas.slice().reverse().forEach(n=>{
+      n.lida=true;
+      const item=document.createElement('div');item.className='list-row';
       item.innerHTML=`<div style="font-size:20px">🔔</div><div class="list-info"><div class="list-name" style="font-size:13px">${n.msg}</div><div class="list-sub">${new Date(n.ts).toLocaleString('pt-BR')}</div></div>`;
       list.appendChild(item);
     });
@@ -1905,10 +1822,13 @@ window.goToTarefas = function(){
 
 function checkPendingTaskNotifs(){
   if(isAdmin)return;
-  const unread=S.notifs.filter(n=>!n.lida&&n.tipo==='tarefa'&&(S.tarefas.find(t=>t.id===n.tarefaId&&(t.funcionario==='todos'||t.funcionario===currentUser.name))));
+  const unread = notifsDoUsuario().filter(n=>
+      !n.lida && n.tipo==='tarefa' &&
+      S.tarefas.find(t=>t.id===n.tarefaId && !t.feita)
+  );
   if(unread.length){
     const t=S.tarefas.find(x=>x.id===unread[0].tarefaId);
-    if(t)showTaskBanner(t.titulo,t.hora);
+    if(t) showTaskBanner(t.titulo,t.hora);
   }
 }
 
